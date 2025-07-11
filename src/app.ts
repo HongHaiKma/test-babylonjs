@@ -15,12 +15,13 @@ import * as GUI from "@babylonjs/gui";
             // public scene: BABYLON.Scene;
 
     // public constructor(public mesh: Mesh, scene: BABYLON.Scene) {
-    //     this.scene = scene;
+    //     scene = scene;
     // }
 
     // public async onStart(): Promise<void> {
         // Creates a basic Babylon Scene object (non-mesh)
-        const engine = this.scene.getEngine();
+        var canvas = document.createElement("canvas");
+        const engine = new BABYLON.Engine(canvas);
         const scene = new BABYLON.Scene(engine);
 
         // Creates and positions a free camera (non-mesh)
@@ -30,7 +31,7 @@ import * as GUI from "@babylonjs/gui";
         camera.setTarget(BABYLON.Vector3.Zero());
 
         // Attaches the camera to the canvas
-        const canvas = engine.getRenderingCanvas();
+        // const canvas = engine.getRenderingCanvas();
         camera.attachControl(canvas, true);
 
         console.log("STARTTTT");
@@ -72,7 +73,7 @@ import * as GUI from "@babylonjs/gui";
 
         // Create the WebXR Experience Helper for an AR Session (it initializes the XR scene, creates an XR Camera, 
         // initialize the features manager, create an HTML UI button to enter XR,...)
-        const xr = await this.scene.createDefaultXRExperienceAsync({
+        const xr = await scene.createDefaultXRExperienceAsync({
             uiOptions: {
                 sessionMode: "immersive-ar",
                 referenceSpaceType: "local-floor",
@@ -89,14 +90,14 @@ import * as GUI from "@babylonjs/gui";
         const xrCamera = xr.baseExperience.camera
 
         //Add glow layer, which will be used in the portal and the marker
-        const gl = new BABYLON.GlowLayer("glow", this.scene, {
+        const gl = new BABYLON.GlowLayer("glow", scene, {
             mainTextureSamples: 4,
             mainTextureFixedSize: 256,
             blurKernelSize: 100
         });
 
         //Create neonMaterial, which will be used in the portal
-        const neonMaterial = new BABYLON.StandardMaterial("neonMaterial", this.scene);
+        const neonMaterial = new BABYLON.StandardMaterial("neonMaterial", scene);
         neonMaterial.emissiveColor = new BABYLON.Color3(0.35, 0.96, 0.88)
 
         //Create a marker that will be used to represent the hitTest position
@@ -124,33 +125,33 @@ import * as GUI from "@babylonjs/gui";
         });
 
         //Set-up root Transform nodes
-        const rootOccluder = new BABYLON.TransformNode("rootOccluder", this.scene);
+        const rootOccluder = new BABYLON.TransformNode("rootOccluder", scene);
         rootOccluder.rotationQuaternion = new BABYLON.Quaternion();
-        const rootScene = new BABYLON.TransformNode("rootScene", this.scene);
+        const rootScene = new BABYLON.TransformNode("rootScene", scene);
         rootScene.rotationQuaternion = new BABYLON.Quaternion();
-        const rootPilar = new BABYLON.TransformNode("rootPilar", this.scene);
+        const rootPilar = new BABYLON.TransformNode("rootPilar", scene);
         rootPilar.rotationQuaternion = new BABYLON.Quaternion();
 
         //Create Occulers which will hide the 3D scene
         const oclVisibility = 0.001;
-        const ground = BABYLON.MeshBuilder.CreateBox("ground", { width: 500, depth: 500, height: 0.001 }, this.scene); // size should be big enough to hideall you want
-        const hole = BABYLON.MeshBuilder.CreateBox("hole", { size: 2, width: 1, height: 0.01 }, this.scene);
+        const ground = BABYLON.MeshBuilder.CreateBox("ground", { width: 500, depth: 500, height: 0.001 }, scene); // size should be big enough to hideall you want
+        const hole = BABYLON.MeshBuilder.CreateBox("hole", { size: 2, width: 1, height: 0.01 }, scene);
 
         const groundCSG = BABYLON.CSG.FromMesh(ground);
         const holeCSG = BABYLON.CSG.FromMesh(hole);
         const booleanCSG = groundCSG.subtract(holeCSG);
         const booleanRCSG = holeCSG.subtract(groundCSG);
         //Create the main occluder - to see the 3D scene through the portal when in real world
-        const occluder = booleanCSG.toMesh("occluder", null, this.scene);
+        const occluder = booleanCSG.toMesh("occluder", null, scene);
         //Create thee reverse occluder - to see the real world  through the portal when inside the 3D scene
-        const occluderR = booleanRCSG.toMesh("occluderR", null, this.scene); 
+        const occluderR = booleanRCSG.toMesh("occluderR", null, scene); 
         //Create an occluder box to hide the 3D scene around the user when in real world
-        const occluderFloor = BABYLON.MeshBuilder.CreateBox("ground", { width: 7, depth: 7, height: 0.001 }, this.scene);
-        const occluderTop = BABYLON.MeshBuilder.CreateBox("occluderTop", { width: 7, depth: 7, height: 0.001 }, this.scene);
-        const occluderRight = BABYLON.MeshBuilder.CreateBox("occluderRight", { width: 7, depth: 7, height: 0.001 }, this.scene);
-        const occluderLeft = BABYLON.MeshBuilder.CreateBox("occluderLeft", { width: 7, depth: 7, height: 0.001 }, this.scene);
-        const occluderback = BABYLON.MeshBuilder.CreateBox("occluderback", { width: 7, depth: 7, height: 0.001 }, this.scene);
-        const occluderMaterial = new BABYLON.StandardMaterial("om", this.scene);
+        const occluderFloor = BABYLON.MeshBuilder.CreateBox("ground", { width: 7, depth: 7, height: 0.001 }, scene);
+        const occluderTop = BABYLON.MeshBuilder.CreateBox("occluderTop", { width: 7, depth: 7, height: 0.001 }, scene);
+        const occluderRight = BABYLON.MeshBuilder.CreateBox("occluderRight", { width: 7, depth: 7, height: 0.001 }, scene);
+        const occluderLeft = BABYLON.MeshBuilder.CreateBox("occluderLeft", { width: 7, depth: 7, height: 0.001 }, scene);
+        const occluderback = BABYLON.MeshBuilder.CreateBox("occluderback", { width: 7, depth: 7, height: 0.001 }, scene);
+        const occluderMaterial = new BABYLON.StandardMaterial("om", scene);
         occluderMaterial.disableLighting = true; // We don't need anything but the position information
         occluderMaterial.forceDepthWrite = true; //Ensure depth information is written to the buffer so meshes further away will not be drawn
         occluder.material = occluderMaterial;
@@ -166,7 +167,7 @@ import * as GUI from "@babylonjs/gui";
         //Load Virtual world: the "Hill Valley Scene" and configure occluders
         
         engine.displayLoadingUI(); //Display the loading screen as the scene takes a few seconds to load
-        const virtualWorldResult = await BABYLON.SceneLoader.ImportMeshAsync("", "https://www.babylonjs.com/Scenes/hillvalley/", "HillValley.babylon", this.scene);
+        const virtualWorldResult = await BABYLON.SceneLoader.ImportMeshAsync("", "https://www.babylonjs.com/Scenes/hillvalley/", "HillValley.babylon", scene);
         engine.hideLoadingUI(); //Hide Loadingscreen once the scene is loaded
         for (let child of virtualWorldResult.meshes) {
             child.renderingGroupId = 1;
@@ -206,9 +207,9 @@ import * as GUI from "@babylonjs/gui";
         occluderback.visibility = oclVisibility;
 
 
-        this.scene.setRenderingAutoClearDepthStencil(1, false, false, false); // Do not clean buffer info to ensure occlusion
-        this.scene.setRenderingAutoClearDepthStencil(0, true, true, true); // Clean for 1rst frame
-        this.scene.autoClear = true;
+        scene.setRenderingAutoClearDepthStencil(1, false, false, false); // Do not clean buffer info to ensure occlusion
+        scene.setRenderingAutoClearDepthStencil(0, true, true, true); // Clean for 1rst frame
+        scene.autoClear = true;
 
         // Make the virtual world and occluders invisible before portal appears
         rootScene.setEnabled(false);
@@ -217,7 +218,7 @@ import * as GUI from "@babylonjs/gui";
         let portalAppearded = false;
         let portalPosition = new BABYLON.Vector3();
 
-        this.scene.onPointerDown = (evt, pickInfo) => {
+        scene.onPointerDown = (evt, pickInfo) => {
 
             if (hitTest && xr.baseExperience.state === BABYLON.WebXRState.IN_XR && !portalAppearded) {
 
@@ -292,13 +293,13 @@ import * as GUI from "@babylonjs/gui";
                 pilar3.material = neonMaterial;
 
                 //add particle effects to the portal
-                BABYLON.ParticleHelper.ParseFromSnippetAsync("UY098C#488", this.scene, false).then(system => {
+                BABYLON.ParticleHelper.ParseFromSnippetAsync("UY098C#488", scene, false).then(system => {
                     system.emitter = pilar3;
                 });
-                BABYLON.ParticleHelper.ParseFromSnippetAsync("UY098C#489", this.scene, false).then(system => {
+                BABYLON.ParticleHelper.ParseFromSnippetAsync("UY098C#489", scene, false).then(system => {
                     system.emitter = pilar1;
                 });
-                BABYLON.ParticleHelper.ParseFromSnippetAsync("UY098C#489", this.scene, false).then(system => {
+                BABYLON.ParticleHelper.ParseFromSnippetAsync("UY098C#489", scene, false).then(system => {
                     system.emitter = pilar2;
                 });
 
@@ -315,7 +316,7 @@ import * as GUI from "@babylonjs/gui";
         })
         
         //Rendering loop 
-        this.scene.onBeforeRenderObservable.add(() => {
+        scene.onBeforeRenderObservable.add(() => {
 
             marker.isVisible = !portalAppearded;
 
@@ -363,12 +364,12 @@ import * as GUI from "@babylonjs/gui";
 //     // public scene: BABYLON.Scene;
 
 //     // public constructor(public mesh: Mesh, scene: BABYLON.Scene) {
-//     //     this.scene = scene;
+//     //     scene = scene;
 //     // }
 
 //     // public async onStart(): Promise<void> {
 //         // Creates a basic Babylon Scene object (non-mesh)
-//         const engine = this.scene.getEngine();
+//         const engine = scene.getEngine();
 //         const scene = new BABYLON.Scene(engine);
 
 //         // Creates and positions a free camera (non-mesh)
@@ -420,7 +421,7 @@ import * as GUI from "@babylonjs/gui";
 
 //         // Create the WebXR Experience Helper for an AR Session (it initializes the XR scene, creates an XR Camera, 
 //         // initialize the features manager, create an HTML UI button to enter XR,...)
-//         const xr = await this.scene.createDefaultXRExperienceAsync({
+//         const xr = await scene.createDefaultXRExperienceAsync({
 //             uiOptions: {
 //                 sessionMode: "immersive-ar",
 //                 referenceSpaceType: "local-floor",
@@ -437,14 +438,14 @@ import * as GUI from "@babylonjs/gui";
 //         const xrCamera = xr.baseExperience.camera
 
 //         //Add glow layer, which will be used in the portal and the marker
-//         const gl = new BABYLON.GlowLayer("glow", this.scene, {
+//         const gl = new BABYLON.GlowLayer("glow", scene, {
 //             mainTextureSamples: 4,
 //             mainTextureFixedSize: 256,
 //             blurKernelSize: 100
 //         });
 
 //         //Create neonMaterial, which will be used in the portal
-//         const neonMaterial = new BABYLON.StandardMaterial("neonMaterial", this.scene);
+//         const neonMaterial = new BABYLON.StandardMaterial("neonMaterial", scene);
 //         neonMaterial.emissiveColor = new BABYLON.Color3(0.35, 0.96, 0.88)
 
 //         //Create a marker that will be used to represent the hitTest position
@@ -472,33 +473,33 @@ import * as GUI from "@babylonjs/gui";
 //         });
 
 //         //Set-up root Transform nodes
-//         const rootOccluder = new BABYLON.TransformNode("rootOccluder", this.scene);
+//         const rootOccluder = new BABYLON.TransformNode("rootOccluder", scene);
 //         rootOccluder.rotationQuaternion = new BABYLON.Quaternion();
-//         const rootScene = new BABYLON.TransformNode("rootScene", this.scene);
+//         const rootScene = new BABYLON.TransformNode("rootScene", scene);
 //         rootScene.rotationQuaternion = new BABYLON.Quaternion();
-//         const rootPilar = new BABYLON.TransformNode("rootPilar", this.scene);
+//         const rootPilar = new BABYLON.TransformNode("rootPilar", scene);
 //         rootPilar.rotationQuaternion = new BABYLON.Quaternion();
 
 //         //Create Occulers which will hide the 3D scene
 //         const oclVisibility = 0.001;
-//         const ground = BABYLON.MeshBuilder.CreateBox("ground", { width: 500, depth: 500, height: 0.001 }, this.scene); // size should be big enough to hideall you want
-//         const hole = BABYLON.MeshBuilder.CreateBox("hole", { size: 2, width: 1, height: 0.01 }, this.scene);
+//         const ground = BABYLON.MeshBuilder.CreateBox("ground", { width: 500, depth: 500, height: 0.001 }, scene); // size should be big enough to hideall you want
+//         const hole = BABYLON.MeshBuilder.CreateBox("hole", { size: 2, width: 1, height: 0.01 }, scene);
 
 //         const groundCSG = BABYLON.CSG.FromMesh(ground);
 //         const holeCSG = BABYLON.CSG.FromMesh(hole);
 //         const booleanCSG = groundCSG.subtract(holeCSG);
 //         const booleanRCSG = holeCSG.subtract(groundCSG);
 //         //Create the main occluder - to see the 3D scene through the portal when in real world
-//         const occluder = booleanCSG.toMesh("occluder", null, this.scene);
+//         const occluder = booleanCSG.toMesh("occluder", null, scene);
 //         //Create thee reverse occluder - to see the real world  through the portal when inside the 3D scene
-//         const occluderR = booleanRCSG.toMesh("occluderR", null, this.scene); 
+//         const occluderR = booleanRCSG.toMesh("occluderR", null, scene); 
 //         //Create an occluder box to hide the 3D scene around the user when in real world
-//         const occluderFloor = BABYLON.MeshBuilder.CreateBox("ground", { width: 7, depth: 7, height: 0.001 }, this.scene);
-//         const occluderTop = BABYLON.MeshBuilder.CreateBox("occluderTop", { width: 7, depth: 7, height: 0.001 }, this.scene);
-//         const occluderRight = BABYLON.MeshBuilder.CreateBox("occluderRight", { width: 7, depth: 7, height: 0.001 }, this.scene);
-//         const occluderLeft = BABYLON.MeshBuilder.CreateBox("occluderLeft", { width: 7, depth: 7, height: 0.001 }, this.scene);
-//         const occluderback = BABYLON.MeshBuilder.CreateBox("occluderback", { width: 7, depth: 7, height: 0.001 }, this.scene);
-//         const occluderMaterial = new BABYLON.StandardMaterial("om", this.scene);
+//         const occluderFloor = BABYLON.MeshBuilder.CreateBox("ground", { width: 7, depth: 7, height: 0.001 }, scene);
+//         const occluderTop = BABYLON.MeshBuilder.CreateBox("occluderTop", { width: 7, depth: 7, height: 0.001 }, scene);
+//         const occluderRight = BABYLON.MeshBuilder.CreateBox("occluderRight", { width: 7, depth: 7, height: 0.001 }, scene);
+//         const occluderLeft = BABYLON.MeshBuilder.CreateBox("occluderLeft", { width: 7, depth: 7, height: 0.001 }, scene);
+//         const occluderback = BABYLON.MeshBuilder.CreateBox("occluderback", { width: 7, depth: 7, height: 0.001 }, scene);
+//         const occluderMaterial = new BABYLON.StandardMaterial("om", scene);
 //         occluderMaterial.disableLighting = true; // We don't need anything but the position information
 //         occluderMaterial.forceDepthWrite = true; //Ensure depth information is written to the buffer so meshes further away will not be drawn
 //         occluder.material = occluderMaterial;
@@ -514,7 +515,7 @@ import * as GUI from "@babylonjs/gui";
 //         //Load Virtual world: the "Hill Valley Scene" and configure occluders
         
 //         engine.displayLoadingUI(); //Display the loading screen as the scene takes a few seconds to load
-//         const virtualWorldResult = await BABYLON.SceneLoader.ImportMeshAsync("", "https://www.babylonjs.com/Scenes/hillvalley/", "HillValley.babylon", this.scene);
+//         const virtualWorldResult = await BABYLON.SceneLoader.ImportMeshAsync("", "https://www.babylonjs.com/Scenes/hillvalley/", "HillValley.babylon", scene);
 //         engine.hideLoadingUI(); //Hide Loadingscreen once the scene is loaded
 //         for (let child of virtualWorldResult.meshes) {
 //             child.renderingGroupId = 1;
@@ -554,9 +555,9 @@ import * as GUI from "@babylonjs/gui";
 //         occluderback.visibility = oclVisibility;
 
 
-//         this.scene.setRenderingAutoClearDepthStencil(1, false, false, false); // Do not clean buffer info to ensure occlusion
-//         this.scene.setRenderingAutoClearDepthStencil(0, true, true, true); // Clean for 1rst frame
-//         this.scene.autoClear = true;
+//         scene.setRenderingAutoClearDepthStencil(1, false, false, false); // Do not clean buffer info to ensure occlusion
+//         scene.setRenderingAutoClearDepthStencil(0, true, true, true); // Clean for 1rst frame
+//         scene.autoClear = true;
 
 //         // Make the virtual world and occluders invisible before portal appears
 //         rootScene.setEnabled(false);
@@ -565,7 +566,7 @@ import * as GUI from "@babylonjs/gui";
 //         let portalAppearded = false;
 //         let portalPosition = new BABYLON.Vector3();
 
-//         this.scene.onPointerDown = (evt, pickInfo) => {
+//         scene.onPointerDown = (evt, pickInfo) => {
 
 //             if (hitTest && xr.baseExperience.state === BABYLON.WebXRState.IN_XR && !portalAppearded) {
 
@@ -640,13 +641,13 @@ import * as GUI from "@babylonjs/gui";
 //                 pilar3.material = neonMaterial;
 
 //                 //add particle effects to the portal
-//                 BABYLON.ParticleHelper.ParseFromSnippetAsync("UY098C#488", this.scene, false).then(system => {
+//                 BABYLON.ParticleHelper.ParseFromSnippetAsync("UY098C#488", scene, false).then(system => {
 //                     system.emitter = pilar3;
 //                 });
-//                 BABYLON.ParticleHelper.ParseFromSnippetAsync("UY098C#489", this.scene, false).then(system => {
+//                 BABYLON.ParticleHelper.ParseFromSnippetAsync("UY098C#489", scene, false).then(system => {
 //                     system.emitter = pilar1;
 //                 });
-//                 BABYLON.ParticleHelper.ParseFromSnippetAsync("UY098C#489", this.scene, false).then(system => {
+//                 BABYLON.ParticleHelper.ParseFromSnippetAsync("UY098C#489", scene, false).then(system => {
 //                     system.emitter = pilar2;
 //                 });
 
@@ -663,7 +664,7 @@ import * as GUI from "@babylonjs/gui";
 //         })
         
 //         //Rendering loop 
-//         this.scene.onBeforeRenderObservable.add(() => {
+//         scene.onBeforeRenderObservable.add(() => {
 
 //             marker.isVisible = !portalAppearded;
 
@@ -696,5 +697,5 @@ import * as GUI from "@babylonjs/gui";
 
 //         });
 
-//         return this.scene;
+//         return scene;
 // }
