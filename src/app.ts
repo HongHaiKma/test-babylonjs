@@ -6,12 +6,12 @@ import * as BABYLON from "@babylonjs/core";
 import "gltf-loader";
 import * as GUI from "@babylonjs/gui";
 
-class App {
+// class App {
     // constructor() {
     //     this.createScene();
     //     }
 
-    createScene = async function () {
+    const createScene = async function () {
             // public scene: BABYLON.Scene;
 
     // public constructor(public mesh: Mesh, scene: BABYLON.Scene) {
@@ -348,8 +348,10 @@ class App {
 
         });
     }
-}
-new App();
+
+    createScene();
+// }
+// new App();
 
 // import { Mesh } from "@babylonjs/core/Meshes/mesh";
 // import { SceneLoader } from "@babylonjs/core/Loading/sceneLoader";
