@@ -7,9 +7,9 @@ import "gltf-loader";
 import * as GUI from "@babylonjs/gui";
 
 class App {
-    constructor() {
-        this.createScene();
-        }
+    // constructor() {
+    //     this.createScene();
+    //     }
 
     createScene = async function () {
             // public scene: BABYLON.Scene;
