@@ -17,5 +17,8 @@
     "typescript": "~5.8.3",
     "vite": "^7.0.4"
   },
-  "homepage": "https://HongHaiKma.github.io/test-babylonjs"
+  "homepage": "https://HongHaiKma.github.io/test-babylonjs",
+  "dependencies": {
+    "@babylonjs/loaders": "^8.16.1"
+  }
 }
