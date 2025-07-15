@@ -11,6 +11,10 @@ import * as GUI from "@babylonjs/gui";
     //     this.createScene();
     //     }
 
+    var canvas = document.createElement("canvas");
+    const engine = new BABYLON.Engine(canvas);
+    const scene = new BABYLON.Scene(engine);
+
     const createScene = async function () {
             // public scene: BABYLON.Scene;
 
@@ -20,9 +24,9 @@ import * as GUI from "@babylonjs/gui";
 
     // public async onStart(): Promise<void> {
         // Creates a basic Babylon Scene object (non-mesh)
-        var canvas = document.createElement("canvas");
-        const engine = new BABYLON.Engine(canvas);
-        const scene = new BABYLON.Scene(engine);
+        // var canvas = document.createElement("canvas");
+        // const engine = new BABYLON.Engine(canvas);
+        // const scene = new BABYLON.Scene(engine);
 
         // Creates and positions a free camera (non-mesh)
         const camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 1, -5), scene);
@@ -355,6 +359,10 @@ import * as GUI from "@babylonjs/gui";
     }
 
     createScene();
+
+    window.addEventListener("resize", () => {
+        engine.resize();
+    });
 
 // import { Engine, Scene, Vector3, HemisphericLight, MeshBuilder } from "@babylonjs/core";
 // import { WebXRDefaultExperience } from "@babylonjs/core/XR/webXRDefaultExperience";
