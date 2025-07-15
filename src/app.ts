@@ -416,9 +416,9 @@ const createXR = async () => {
     box.position = xrCamera.position.add(xrCamera.getForwardRay().direction.scale(5));
 
     // Start the render loop
-    // engine.runRenderLoop(() => {
-    //     scene.render();
-    // });
+    engine.runRenderLoop(() => {
+        scene.render();
+    });
 };
 
 createXR();
