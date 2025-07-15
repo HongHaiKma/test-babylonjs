@@ -352,6 +352,60 @@
 
 //     createScene();
 
+// import { Engine, Scene, Vector3, HemisphericLight, MeshBuilder } from "@babylonjs/core";
+// import { WebXRDefaultExperience } from "@babylonjs/core/XR/webXRDefaultExperience";
+// import { WebXRSessionManager } from "@babylonjs/core/XR/webXRSessionManager";
+// import "@babylonjs/core/Debug/debugLayer";
+// import "@babylonjs/inspector";
+// import "@babylonjs/loaders";
+
+// // Get canvas
+// var canvas = document.createElement("canvas");
+// // const canvas = document.getElementById("renderCanvas");
+// const engine = new Engine(canvas, true);
+
+// // Create scene
+// const scene = new Scene(engine);
+
+// // Light
+// const light = new HemisphericLight("light", new Vector3(0, 1, 0), scene);
+
+// // Basic object (optional)
+// const box = MeshBuilder.CreateBox("box", {}, scene);
+// box.position.y = 0.5;
+
+// // Create XR experience
+// const createXR = async () => {
+//     const arAvailable = await WebXRSessionManager.IsSessionSupportedAsync('immersive-ar');
+//     console.log("AR available: ", arAvailable);
+//     const xr = await WebXRDefaultExperience.CreateAsync(scene, {
+//         uiOptions: {
+//         sessionMode: "immersive-ar", // this enables AR
+//         referenceSpaceType: "local"
+//         },
+//         optionalFeatures: true
+//     });
+
+//     // Access the AR camera
+//     const xrCamera = xr.baseExperience.camera;
+//     console.log("AR Camera ready:", xrCamera);
+
+//     // Auto place box in front of camera
+//     box.position = xrCamera.position.add(xrCamera.getForwardRay().direction.scale(1));
+
+//     // Run the render loop
+//     engine.runRenderLoop(() => {
+//         scene.render();
+//     });
+// };
+
+// createXR();
+
+// // Resize
+// window.addEventListener("resize", () => {
+//   engine.resize();
+// });
+
 import { Engine, Scene, Vector3, HemisphericLight, MeshBuilder } from "@babylonjs/core";
 import { WebXRDefaultExperience } from "@babylonjs/core/XR/webXRDefaultExperience";
 import { WebXRSessionManager } from "@babylonjs/core/XR/webXRSessionManager";
@@ -359,29 +413,39 @@ import "@babylonjs/core/Debug/debugLayer";
 import "@babylonjs/inspector";
 import "@babylonjs/loaders";
 
-// Get canvas
+// Create and append canvas to the DOM
 var canvas = document.createElement("canvas");
-// const canvas = document.getElementById("renderCanvas");
-const engine = new Engine(canvas, true);
+canvas.style.width = "100vw";
+canvas.style.height = "100vh";
+document.body.appendChild(canvas);
 
-// Create scene
+// Initialize the engine and scene
+const engine = new Engine(canvas, true);
 const scene = new Scene(engine);
 
-// Light
+// Add a light to the scene
 const light = new HemisphericLight("light", new Vector3(0, 1, 0), scene);
 
-// Basic object (optional)
+// Create a basic box object (optional)
 const box = MeshBuilder.CreateBox("box", {}, scene);
 box.position.y = 0.5;
 
-// Create XR experience
+// Function to start the AR experience
 const createXR = async () => {
-    const arAvailable = await WebXRSessionManager.IsSessionSupportedAsync('immersive-ar');
-    console.log("AR available: ", arAvailable);
+    // Check if immersive-ar sessions are supported
+    const arAvailable = await WebXRSessionManager.IsSessionSupportedAsync("immersive-ar");
+    console.log("AR available:", arAvailable);
+
+    if (!arAvailable) {
+        console.warn("Immersive AR not supported on this device.");
+        return;
+    }
+
+    // Create the AR experience
     const xr = await WebXRDefaultExperience.CreateAsync(scene, {
         uiOptions: {
-        sessionMode: "immersive-ar", // this enables AR
-        referenceSpaceType: "local"
+            sessionMode: "immersive-ar",  // Enable AR mode
+            referenceSpaceType: "local"
         },
         optionalFeatures: true
     });
@@ -390,18 +454,26 @@ const createXR = async () => {
     const xrCamera = xr.baseExperience.camera;
     console.log("AR Camera ready:", xrCamera);
 
-    // Auto place box in front of camera
+    // Auto place the box in front of the camera
     box.position = xrCamera.position.add(xrCamera.getForwardRay().direction.scale(1));
 
-    // Run the render loop
+    // Start the render loop
     engine.runRenderLoop(() => {
         scene.render();
     });
 };
 
-createXR();
+// Create a button for starting the AR experience (user gesture required)
+const enterARButton = document.createElement("button");
+enterARButton.textContent = "Enter AR";
+enterARButton.style.position = "absolute";
+enterARButton.style.top = "20px";
+enterARButton.style.left = "20px";
+document.body.appendChild(enterARButton);
 
-// Resize
+enterARButton.addEventListener("click", createXR);
+
+// Adjust engine on window resize
 window.addEventListener("resize", () => {
   engine.resize();
 });
