@@ -392,12 +392,12 @@ const createXR = async () => {
 
     // Auto place box in front of camera
     box.position = xrCamera.position.add(xrCamera.getForwardRay().direction.scale(1));
-};
 
-// Run the render loop
-engine.runRenderLoop(() => {
-  scene.render();
-});
+    // Run the render loop
+    engine.runRenderLoop(() => {
+        scene.render();
+    });
+};
 
 createXR();
 
