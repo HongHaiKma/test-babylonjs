@@ -417,6 +417,7 @@ const createXR = async () => {
 
     // Start the render loop
     engine.runRenderLoop(() => {
+        box.rotation.y += 5; // Rotate the box around the Y axis
         scene.render();
     });
 };
