@@ -419,9 +419,11 @@ const createXR = async () => {
     // box.position = xrCamera.position.add(xrCamera.getForwardRay().direction.scale(5));
 
     const loadModel = async () => {
-        const modelUrl = "https://xensear-arworld.s3.ap-southeast-5.amazonaws.com/ar-world/AssetBundles/BabylonModelTest/";
+        // const modelUrl = "https://xensear-arworld.s3.ap-southeast-5.amazonaws.com/ar-world/AssetBundles/BabylonModelTest/";
+        const modelUrl = "https://dl.dropbox.com/s/h0e15ypqmcm8f63gq3tzl/RingRing.glb";
+        
         const fileName = "RingRing.glb";
-        const result = await SceneLoader.ImportMeshAsync("", modelUrl, fileName, scene);
+        const result = await SceneLoader.ImportMeshAsync("", modelUrl, "", scene);
 
         loadedModel = result.meshes[0];
         loadedModel.position = xrCamera.position.add(xrCamera.getForwardRay().direction.scale(5));
