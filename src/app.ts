@@ -364,12 +364,13 @@
 //         engine.resize();
 //     });
 
-import { Engine, Scene, Vector3, HemisphericLight, MeshBuilder } from "@babylonjs/core";
+import { Engine, Scene, Vector3, HemisphericLight, MeshBuilder, AbstractMesh } from "@babylonjs/core";
 import { WebXRDefaultExperience } from "@babylonjs/core/XR/webXRDefaultExperience";
 import { WebXRSessionManager } from "@babylonjs/core/XR/webXRSessionManager";
 import "@babylonjs/core/Debug/debugLayer";
 import "@babylonjs/inspector";
 import "@babylonjs/loaders";
+import { SceneLoader } from "@babylonjs/core/Loading/sceneLoader";
 
 // Create and append canvas to the DOM
 var canvas = document.createElement("canvas");
@@ -384,9 +385,11 @@ const scene = new Scene(engine);
 // Add a light to the scene
 const light = new HemisphericLight("light", new Vector3(0, 1, 0), scene);
 
-// Create a basic box object (optional)
-const box = MeshBuilder.CreateBox("box", {}, scene);
-box.position.y = 0.5;
+// // Create a basic box object (optional)
+// const box = MeshBuilder.CreateBox("box", {}, scene);
+// box.position.y = 0.5;
+
+let loadedModel: AbstractMesh | null = null; 
 
 // Function to start the AR experience
 const createXR = async () => {
@@ -413,11 +416,26 @@ const createXR = async () => {
     console.log("AR Camera ready:", xrCamera);
 
     // Auto place the box in front of the camera
-    box.position = xrCamera.position.add(xrCamera.getForwardRay().direction.scale(5));
+    // box.position = xrCamera.position.add(xrCamera.getForwardRay().direction.scale(5));
+
+    const loadModel = async () => {
+        const modelUrl = "https://xensear-arworld.s3.ap-southeast-5.amazonaws.com/ar-world/AssetBundles/BabylonModelTest/";
+        const fileName = "RingRing.glb";
+        const result = await SceneLoader.ImportMeshAsync("", modelUrl, fileName, scene);
+
+        loadedModel = result.meshes[0];
+        loadedModel.position = xrCamera.position.add(xrCamera.getForwardRay().direction.scale(5));
+    };
+
+    loadModel();
 
     // Start the render loop
     engine.runRenderLoop(() => {
-        box.rotation.y += 5; // Rotate the box around the Y axis
+        if (loadedModel) {
+            loadedModel.rotation.x += 10;
+            loadedModel.rotation.y += 10;
+            loadedModel.rotation.z += 10;
+        }
         scene.render();
     });
 };
