@@ -434,9 +434,9 @@ const createXR = async () => {
     // Start the render loop
     engine.runRenderLoop(() => {
         // if (loadedModel) {
-        //     loadedModel.rotation.x += 10;
-        //     loadedModel.rotation.y += 10;
-        //     loadedModel.rotation.z += 10;
+            loadedModel.rotation.x += 10;
+            loadedModel.rotation.y += 10;
+            loadedModel.rotation.z += 10;
         // }
         scene.render();
     });
