@@ -420,7 +420,7 @@ const createXR = async () => {
 
     const loadModel = async () => {
         // const modelUrl = "https://xensear-arworld.s3.ap-southeast-5.amazonaws.com/ar-world/AssetBundles/BabylonModelTest/";
-        const modelUrl = "https://dl.dropbox.com/s/h0e15ypqmcm8f63gq3tzl/RingRing.glb";
+        const modelUrl = "https://www.dropbox.com/s/h0e15ypqmcm8f63gq3tzl/RingRing.glb";
         
         const fileName = "RingRing.glb";
         const result = await SceneLoader.ImportMeshAsync("", modelUrl, "", scene);
