@@ -389,7 +389,7 @@ const light = new HemisphericLight("light", new Vector3(0, 1, 0), scene);
 // const box = MeshBuilder.CreateBox("box", {}, scene);
 // box.position.y = 0.5;
 
-let loadedModel: AbstractMesh | null = null; 
+let loadedModel: AbstractMesh;
 
 // Function to start the AR experience
 const createXR = async () => {
