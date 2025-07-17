@@ -73,6 +73,8 @@ const createXR = async () => {
         "latest"
     ) as BABYLON.WebXRAnchorSystem;
 
+    console.log("Anchor Feature");
+
     // hitTest.onHitTestResultObservable.add(async (results) => {
     //     if (results.length > 0 && loadedModel) {
             // const hit = results[0];
