@@ -71,13 +71,13 @@ const createXR = async () => {
         "latest"
     ) as BABYLON.WebXRAnchorSystem;
 
-    hitTest.onHitTestResultObservable.add(async (results) => {
-        if (results.length > 0 && loadedModel) {
-            const hit = results[0];
+    // hitTest.onHitTestResultObservable.add(async (results) => {
+    //     if (results.length > 0 && loadedModel) {
+            // const hit = results[0];
             let position = new Vector3();
             position = xrCamera.getForwardRay().direction.scale(3.5);
 
-            hit.transformationMatrix.decompose(undefined, undefined, position);
+            // hit.transformationMatrix.decompose(undefined, undefined, position);
 
             // Move mesh to hit test position
             // loadedModel.position = position;
@@ -103,8 +103,8 @@ const createXR = async () => {
                 loadedModel.isVisible = true;
                 anchor.attachedNode = boxTransformNode;
             });
-        }
-    });
+        // }
+    // });
 
     // Start the render loop
     engine.runRenderLoop(() => {
