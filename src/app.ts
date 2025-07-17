@@ -60,6 +60,8 @@ const createXR = async () => {
 
     await loadModel();
 
+    console.log("Model loaded");
+
     // const hitTest = xr.baseExperience.featuresManager.enableFeature(
     //     "hit-test",
     //     "latest"
@@ -94,7 +96,7 @@ const createXR = async () => {
             //     loadedModel.parent = anchor;
             // }
             // if (anchorFeature && anchorFeature.) {
-            const anchor = await anchorFeature.addAnchorAtPositionAndRotationAsync(position).then((anchor) => {
+            await anchorFeature.addAnchorAtPositionAndRotationAsync(position).then((anchor) => {
                 console.log("Anchor created:", anchor)  ;
                 const boxTransformNode = new BABYLON.TransformNode('boxTransformNode');
                 boxTransformNode.position = position;
