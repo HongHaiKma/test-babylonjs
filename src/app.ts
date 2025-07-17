@@ -60,10 +60,10 @@ const createXR = async () => {
 
     await loadModel();
 
-    const hitTest = xr.baseExperience.featuresManager.enableFeature(
-        "hit-test",
-        "latest"
-    ) as BABYLON.WebXRHitTest;
+    // const hitTest = xr.baseExperience.featuresManager.enableFeature(
+    //     "hit-test",
+    //     "latest"
+    // ) as BABYLON.WebXRHitTest;
 
     // Enable anchor feature
     const anchorFeature = xr.baseExperience.featuresManager.enableFeature(
