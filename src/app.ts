@@ -81,32 +81,32 @@ const createXR = async () => {
             let position = new Vector3();
             position = xrCamera.getForwardRay().direction.scale(3.5);
 
-            // hit.transformationMatrix.decompose(undefined, undefined, position);
+            // await anchorFeature.onInitializedObservable.addOnce(() => {
+            //     console.log("Anchor system initialized");
+            // });
 
-            // Move mesh to hit test position
-            // loadedModel.position = position;
+            // await anchorFeature.addAnchorAtPositionAndRotationAsync(position, BABYLON.Quaternion.Identity()).then((anchor) => {
+            //     console.log("Anchor created:", anchor)  ;
+            //     const boxTransformNode = new BABYLON.TransformNode('boxTransformNode');
+            //     boxTransformNode.position = position;
+            //     loadedModel.parent = boxTransformNode;
+            //     loadedModel.position = Vector3.Zero();
+            //     loadedModel.isVisible = true;
+            //     anchor.attachedNode = boxTransformNode;
+            // });
 
-            // // Anchor mesh if supported
-            // if (anchorFeature && anchorFeature.attachAnchor) {
-            //     const anchor = await anchorFeature.attachAnchor(hit.transformationMatrix, loadedModel);
-            //     loadedModel.parent = anchor;
-            // }
+            const anchor = await anchorFeature.addAnchorAtPositionAndRotationAsync(position, BABYLON.Quaternion.Identity());
 
-            // Anchor mesh if supported
-            // if (hit.createAnchor) {
-            //     const anchor = await hit.createAnchor();
-            //     loadedModel.parent = anchor;
-            // }
-            // if (anchorFeature && anchorFeature.) {
-            await anchorFeature.addAnchorAtPositionAndRotationAsync(position, BABYLON.Quaternion.Identity()).then((anchor) => {
-                console.log("Anchor created:", anchor)  ;
-                const boxTransformNode = new BABYLON.TransformNode('boxTransformNode');
-                boxTransformNode.position = position;
-                loadedModel.parent = boxTransformNode;
-                loadedModel.position = Vector3.Zero();
-                loadedModel.isVisible = true;
-                anchor.attachedNode = boxTransformNode;
-            });
+            console.log("Anchor created", anchor);
+
+            const node = new BABYLON.TransformNode("anchorNode", scene);
+            node.position = position;
+            node.rotationQuaternion = BABYLON.Quaternion.Identity();
+
+            loadedModel.parent = node;
+            loadedModel.position = Vector3.Zero();
+            anchor.attachedNode = node;
+            loadedModel.isVisible = true;
         // }
     // });
 
