@@ -371,6 +371,7 @@ import "@babylonjs/core/Debug/debugLayer";
 import "@babylonjs/inspector";
 import "@babylonjs/loaders";
 import { SceneLoader } from "@babylonjs/core/Loading/sceneLoader";
+import * as BABYLON from "@babylonjs/core";
 
 // Create and append canvas to the DOM
 var canvas = document.createElement("canvas");
@@ -384,10 +385,6 @@ const scene = new Scene(engine);
 
 // Add a light to the scene
 const light = new HemisphericLight("light", new Vector3(0, 1, 0), scene);
-
-// // Create a basic box object (optional)
-// const box = MeshBuilder.CreateBox("box", {}, scene);
-// box.position.y = 0.5;
 
 let loadedModel: AbstractMesh;
 
@@ -415,28 +412,65 @@ const createXR = async () => {
     const xrCamera = xr.baseExperience.camera;
     console.log("AR Camera ready:", xrCamera);
 
-    // Auto place the box in front of the camera
-    // box.position = xrCamera.position.add(xrCamera.getForwardRay().direction.scale(5));
-
     const loadModel = async () => {
         // const modelUrl = "https://xensear-arworld.s3.ap-southeast-5.amazonaws.com/ar-world/AssetBundles/BabylonModelTest/";
         const modelUrl = "https://dl.dropbox.com/scl/fi/h0e15ypqmcm8f63gq3tzl/RingRing.glb?rlkey=1jnot0nw8rl22voz55fv4542l&st=0rihhho0";
         
         const fileName = "RingRing.glb";
         const result = await SceneLoader.ImportMeshAsync("", modelUrl, "", scene);
-
         loadedModel = result.meshes[0];
-        loadedModel.position = xrCamera.position.add(xrCamera.getForwardRay().direction.scale(5));
+        loadedModel.position = xrCamera.position.add(xrCamera.getForwardRay().direction.scale(3.5));
     };
 
-    loadModel();
+    await loadModel();
+
+    const hitTest = xr.baseExperience.featuresManager.enableFeature(
+        "hit-test",
+        "latest"
+    ) as BABYLON.WebXRHitTest;
+
+    // Enable anchor feature
+    const anchorFeature = xr.baseExperience.featuresManager.enableFeature(
+        BABYLON.WebXRAnchorSystem.Name,
+        "latest"
+    ) as BABYLON.WebXRAnchorSystem;
+
+    hitTest.onHitTestResultObservable.add(async (results) => {
+        if (results.length > 0 && loadedModel) {
+            const hit = results[0];
+            const position = new Vector3();
+            hit.transformationMatrix.decompose(undefined, undefined, position);
+
+            // Move mesh to hit test position
+            loadedModel.position = position;
+
+            // // Anchor mesh if supported
+            // if (anchorFeature && anchorFeature.attachAnchor) {
+            //     const anchor = await anchorFeature.attachAnchor(hit.transformationMatrix, loadedModel);
+            //     loadedModel.parent = anchor;
+            // }
+
+            // Anchor mesh if supported
+            // if (hit.createAnchor) {
+            //     const anchor = await hit.createAnchor();
+            //     loadedModel.parent = anchor;
+            // }
+            if ("createAnchor" in hit && typeof hit.createAnchor === "function") {
+                // const anchor = await hit.createAnchor();
+                // loadedModel.parent = anchor;
+
+                const anchor = await hit.createAnchor();
+                loadedModel.parent = anchor;
+            }
+        }
+    });
 
     // Start the render loop
     engine.runRenderLoop(() => {
         // if (loadedModel) {
-            loadedModel.rotation.x += 10;
-            loadedModel.rotation.y += 10;
-            loadedModel.rotation.z += 10;
+            // loadedModel.rotation.x += 10;
+            // loadedModel.rotation.y += 10;
+            // loadedModel.rotation.z += 10;
         // }
         scene.render();
     });
