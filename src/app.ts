@@ -95,8 +95,8 @@ const createXR = async () => {
             //     anchor.attachedNode = boxTransformNode;
             // });
 
-            xr.baseExperience.sessionManager.onXRFrameObservable.add(() => {
-                 anchorFeature.addAnchorAtPositionAndRotationAsync(position, BABYLON.Quaternion.Identity())
+            const observer = xr.baseExperience.sessionManager.onXRFrameObservable.add(() => {
+                anchorFeature.addAnchorAtPositionAndRotationAsync(position, BABYLON.Quaternion.Identity())
                     .then((anchor) => {
                         console.log("Anchor created", anchor);
 
@@ -109,7 +109,8 @@ const createXR = async () => {
                         loadedModel.isVisible = true;
 
                         anchor.attachedNode = node;
-                    })
+                        xr.baseExperience.sessionManager.onXRFrameObservable.remove(observer); // run once
+                })
             })
 
             // const anchor = await anchorFeature.addAnchorAtPositionAndRotationAsync(position, BABYLON.Quaternion.Identity());
