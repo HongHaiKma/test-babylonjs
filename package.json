@@ -11,7 +11,7 @@
     "deploy": "gh-pages -d dist"
   },
   "devDependencies": {
-    "@babylonjs/core": "^8.16.0",
+    "@babylonjs/core": "^8.16.3",
     "@babylonjs/inspector": "^8.16.0",
     "gh-pages": "^6.3.0",
     "typescript": "~5.8.3",
@@ -19,6 +19,6 @@
   },
   "homepage": "https://HongHaiKma.github.io/test-babylonjs",
   "dependencies": {
-    "@babylonjs/loaders": "^8.16.1"
+    "@babylonjs/loaders": "^8.16.3"
   }
 }
