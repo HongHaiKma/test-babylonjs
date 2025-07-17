@@ -129,10 +129,10 @@ const createXR = async () => {
 
     // Start the render loop
     engine.runRenderLoop(() => {
-        const worldPosition = loadedModel.getAbsolutePosition();
-        console.log("X: ", worldPosition.x);
-        console.log("Y: ", worldPosition.y);
-        console.log("Z: ", worldPosition.z);
+        // const worldPosition = loadedModel.getAbsolutePosition();
+        // console.log("X: ", worldPosition.x);
+        // console.log("Y: ", worldPosition.y);
+        // console.log("Z: ", worldPosition.z);
         scene.render();
     });
 };
