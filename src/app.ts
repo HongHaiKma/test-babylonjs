@@ -98,7 +98,7 @@ const createXR = async () => {
             //     loadedModel.parent = anchor;
             // }
             // if (anchorFeature && anchorFeature.) {
-            await anchorFeature.addAnchorAtPositionAndRotationAsync(position).then((anchor) => {
+            await anchorFeature.addAnchorAtPositionAndRotationAsync(position, BABYLON.Quaternion.Identity()).then((anchor) => {
                 console.log("Anchor created:", anchor)  ;
                 const boxTransformNode = new BABYLON.TransformNode('boxTransformNode');
                 boxTransformNode.position = position;
