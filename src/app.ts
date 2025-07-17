@@ -73,7 +73,7 @@ const createXR = async () => {
         "latest"
     ) as BABYLON.WebXRAnchorSystem;
 
-    console.log("Anchor system compatibility:", anchorFeature.isCompatible);
+    console.log("Anchor system compatibility:", anchorFeature.isCompatible());
 
     // hitTest.onHitTestResultObservable.add(async (results) => {
     //     if (results.length > 0 && loadedModel) {
