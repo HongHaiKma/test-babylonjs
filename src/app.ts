@@ -95,18 +95,35 @@ const createXR = async () => {
             //     anchor.attachedNode = boxTransformNode;
             // });
 
-            const anchor = await anchorFeature.addAnchorAtPositionAndRotationAsync(position, BABYLON.Quaternion.Identity());
+            xr.baseExperience.sessionManager.onXRFrameObservable.add(() => {
+                 anchorFeature.addAnchorAtPositionAndRotationAsync(position, BABYLON.Quaternion.Identity())
+                    .then((anchor) => {
+                        console.log("Anchor created", anchor);
 
-            console.log("Anchor created", anchor);
+                        const node = new BABYLON.TransformNode("anchorNode", scene);
+                        node.position = position;
+                        node.rotationQuaternion = BABYLON.Quaternion.Identity();
 
-            const node = new BABYLON.TransformNode("anchorNode", scene);
-            node.position = position;
-            node.rotationQuaternion = BABYLON.Quaternion.Identity();
+                        loadedModel.parent = node;
+                        loadedModel.position = BABYLON.Vector3.Zero();
+                        loadedModel.isVisible = true;
 
-            loadedModel.parent = node;
-            loadedModel.position = Vector3.Zero();
-            anchor.attachedNode = node;
-            loadedModel.isVisible = true;
+                        anchor.attachedNode = node;
+                    })
+            })
+
+            // const anchor = await anchorFeature.addAnchorAtPositionAndRotationAsync(position, BABYLON.Quaternion.Identity());
+
+            // console.log("Anchor created", anchor);
+
+            // const node = new BABYLON.TransformNode("anchorNode", scene);
+            // node.position = position;
+            // node.rotationQuaternion = BABYLON.Quaternion.Identity();
+
+            // loadedModel.parent = node;
+            // loadedModel.position = Vector3.Zero();
+            // anchor.attachedNode = node;
+            // loadedModel.isVisible = true;
         // }
     // });
 
