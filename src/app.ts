@@ -39,7 +39,7 @@ const createXR = async () => {
     const xr = await WebXRDefaultExperience.CreateAsync(scene, {
         uiOptions: {
             sessionMode: "immersive-ar",  // Enable AR mode
-            referenceSpaceType: "unbounded"
+            referenceSpaceType: "local-floor"
         },
         optionalFeatures: true
     });
@@ -81,52 +81,23 @@ const createXR = async () => {
             let position = new Vector3();
             position = xrCamera.getForwardRay().direction.scale(3.5);
 
-            // await anchorFeature.onInitializedObservable.addOnce(() => {
-            //     console.log("Anchor system initialized");
-            // });
-
-            // await anchorFeature.addAnchorAtPositionAndRotationAsync(position, BABYLON.Quaternion.Identity()).then((anchor) => {
-            //     console.log("Anchor created:", anchor)  ;
-            //     const boxTransformNode = new BABYLON.TransformNode('boxTransformNode');
-            //     boxTransformNode.position = position;
-            //     loadedModel.parent = boxTransformNode;
-            //     loadedModel.position = Vector3.Zero();
-            //     loadedModel.isVisible = true;
-            //     anchor.attachedNode = boxTransformNode;
-            // });
-
             const observer = xr.baseExperience.sessionManager.onXRFrameObservable.add(() => {
-                anchorFeature.addAnchorAtPositionAndRotationAsync(position, BABYLON.Quaternion.Identity())
-                    .then((anchor) => {
-                        console.log("Anchor created", anchor);
+                anchorFeature.addAnchorAtPositionAndRotationAsync(position, BABYLON.Quaternion.Identity()).then((anchor) => {
+                    console.log("Anchor created", anchor);
 
-                        const node = new BABYLON.TransformNode("anchorNode", scene);
-                        node.position = position;
-                        node.rotationQuaternion = BABYLON.Quaternion.Identity();
+                    const node = new BABYLON.TransformNode("anchorNode", scene);
+                    node.position = position;
+                    node.rotationQuaternion = BABYLON.Quaternion.Identity();
 
-                        loadedModel.parent = node;
-                        loadedModel.position = BABYLON.Vector3.Zero();
-                        loadedModel.isVisible = true;
+                    anchor.attachedNode = node;
 
-                        anchor.attachedNode = node;
-                        xr.baseExperience.sessionManager.onXRFrameObservable.remove(observer); // run once
+                    loadedModel.parent = node;
+                    loadedModel.position = BABYLON.Vector3.Zero();
+                    loadedModel.isVisible = true;
+
+                    xr.baseExperience.sessionManager.onXRFrameObservable.remove(observer); // run once
                 })
             })
-
-            // const anchor = await anchorFeature.addAnchorAtPositionAndRotationAsync(position, BABYLON.Quaternion.Identity());
-
-            // console.log("Anchor created", anchor);
-
-            // const node = new BABYLON.TransformNode("anchorNode", scene);
-            // node.position = position;
-            // node.rotationQuaternion = BABYLON.Quaternion.Identity();
-
-            // loadedModel.parent = node;
-            // loadedModel.position = Vector3.Zero();
-            // anchor.attachedNode = node;
-            // loadedModel.isVisible = true;
-        // }
-    // });
 
     // Start the render loop
     engine.runRenderLoop(() => {
