@@ -39,7 +39,7 @@ const createXR = async () => {
     const xr = await WebXRDefaultExperience.CreateAsync(scene, {
         uiOptions: {
             sessionMode: "immersive-ar",  // Enable AR mode
-            referenceSpaceType: "local-floor"
+            referenceSpaceType: "unbounded"
         },
         optionalFeatures: true
     });
