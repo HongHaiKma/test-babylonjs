@@ -75,29 +75,37 @@ const createXR = async () => {
 
     console.log("Anchor system compatibility:", anchorFeature.isCompatible());
 
-    // hitTest.onHitTestResultObservable.add(async (results) => {
-    //     if (results.length > 0 && loadedModel) {
-            // const hit = results[0];
-            let position = new Vector3();
-            position = xrCamera.getForwardRay().direction.scale(3.5);
+    let position = new Vector3();
+    position = xrCamera.getForwardRay().direction.scale(3.5);
 
-            const observer = xr.baseExperience.sessionManager.onXRFrameObservable.add(() => {
-                anchorFeature.addAnchorAtPositionAndRotationAsync(position, BABYLON.Quaternion.Identity()).then((anchor) => {
-                    console.log("Anchor created", anchor);
+    const observer = xr.baseExperience.sessionManager.onXRFrameObservable.add(() => {
+        anchorFeature.addAnchorAtPositionAndRotationAsync(position, BABYLON.Quaternion.Identity()).then((anchor) => {
+            console.log("Anchor created", anchor);
 
-                    const node = new BABYLON.TransformNode("anchorNode", scene);
-                    node.position = position;
-                    node.rotationQuaternion = BABYLON.Quaternion.Identity();
+            const node = new BABYLON.TransformNode("anchorNode", scene);
+            node.position = position;
+            node.rotationQuaternion = BABYLON.Quaternion.Identity();
 
-                    anchor.attachedNode = node;
+            anchor.attachedNode = node;
 
-                    loadedModel.parent = node;
-                    loadedModel.position = BABYLON.Vector3.Zero();
-                    loadedModel.isVisible = true;
+            loadedModel.parent = node;
+            loadedModel.position = BABYLON.Vector3.Zero();
+            loadedModel.isVisible = true;
 
-                    xr.baseExperience.sessionManager.onXRFrameObservable.remove(observer); // run once
-                })
-            })
+            xr.baseExperience.sessionManager.onXRFrameObservable.remove(observer); // run once
+        })
+    })
+
+    const anchors = anchorFeature.anchors;
+
+    // Log the number of anchors
+    console.log("Number of anchors:", anchors.length);
+
+    // List all anchors
+    anchors.forEach((anchor) => {
+        console.log("Anchor:", anchor);
+        // You can access anchor.attachedNode, anchor.id, etc.
+    });
 
     // Start the render loop
     engine.runRenderLoop(() => {
