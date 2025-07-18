@@ -109,24 +109,34 @@ const createXR = async () => {
         // You can access anchor.attachedNode, anchor.id, etc.
     });
 
+    // Preload bullet model from Dropbox
+    let bulletModel: BABYLON.AbstractMesh | null = null;
+    async function preloadBulletModel() {
+        if (!bulletModel) {
+            const bulletUrl = "https://dl.dropbox.com/scl/fi/sy3d2do6230xr7d6m4qze/bullet.glb?rlkey=nyjocnqem4gk93ieozmpn5lx1&st=z3ryay9m";
+            const result = await BABYLON.SceneLoader.ImportMeshAsync("", bulletUrl, "", scene);
+            bulletModel = result.meshes[0];
+            bulletModel.setEnabled(false); // Hide the template
+        }
+    }
+
+    await preloadBulletModel();
+
     function shootBullet() {
-            // Create a small sphere as the bullet
-            const bullet = BABYLON.MeshBuilder.CreateSphere("bullet", { diameter: 0.1 }, scene);
-            bullet.position = xrCamera.position.clone();
-
-            // Get the forward direction of the camera
-            const forward = xrCamera.getForwardRay().direction.normalize();
-
-            // Set bullet speed
-            const speed = 0.1;
-
-            // Move the bullet every frame
-            scene.onBeforeRenderObservable.add(() => {
-                bullet.position.addInPlace(forward.scale(speed));
-                // Optionally: dispose bullet if too far
-                if (BABYLON.Vector3.Distance(bullet.position, xrCamera.position) > 50) {
-                    bullet.dispose();
-                }
+        if (!bulletModel) return;
+        // Clone the bullet model
+        const bullet = bulletModel.clone("bulletInstance", null);
+        bullet.setEnabled(true);
+        bullet.position = xrCamera.position.clone();
+        const forward = xrCamera.getForwardRay().direction.normalize();
+        const speed = 0.1;
+        // Move the bullet every frame
+        const observer = scene.onBeforeRenderObservable.add(() => {
+            bullet.position.addInPlace(forward.scale(speed));
+            if (BABYLON.Vector3.Distance(bullet.position, xrCamera.position) > 50) {
+                bullet.dispose();
+                scene.onBeforeRenderObservable.remove(observer);
+            }
         });
     }
 
