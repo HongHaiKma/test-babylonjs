@@ -50,9 +50,11 @@ const createXR = async () => {
 
     const loadModel = async () => {
         // const modelUrl = "https://xensear-arworld.s3.ap-southeast-5.amazonaws.com/ar-world/AssetBundles/BabylonModelTest/";
-        const modelUrl = "https://dl.dropbox.com/scl/fi/h0e15ypqmcm8f63gq3tzl/RingRing.glb?rlkey=1jnot0nw8rl22voz55fv4542l&st=0rihhho0";
+        // const modelUrl = "https://dl.dropbox.com/scl/fi/h0e15ypqmcm8f63gq3tzl/RingRing.glb?rlkey=1jnot0nw8rl22voz55fv4542l&st=0rihhho0";
+        const modelUrl = "https://dl.dropbox.com/scl/fi/sy3d2do6230xr7d6m4qze/bullet.glb?rlkey=nyjocnqem4gk93ieozmpn5lx1&st=z3ryay9m";
         
-        const fileName = "RingRing.glb";
+        // const fileName = "RingRing.glb";
+        const fileName = "bullet.glb";
         const result = await SceneLoader.ImportMeshAsync("", modelUrl, "", scene);
         loadedModel = result.meshes[0];
         // loadedModel.position = xrCamera.position.add(xrCamera.getForwardRay().direction.scale(3.5));
