@@ -109,6 +109,31 @@ const createXR = async () => {
         // You can access anchor.attachedNode, anchor.id, etc.
     });
 
+    function shootBullet() {
+            // Create a small sphere as the bullet
+            const bullet = BABYLON.MeshBuilder.CreateSphere("bullet", { diameter: 0.1 }, scene);
+            bullet.position = xrCamera.position.clone();
+
+            // Get the forward direction of the camera
+            const forward = xrCamera.getForwardRay().direction.normalize();
+
+            // Set bullet speed
+            const speed = 0.1;
+
+            // Move the bullet every frame
+            scene.onBeforeRenderObservable.add(() => {
+                bullet.position.addInPlace(forward.scale(speed));
+                // Optionally: dispose bullet if too far
+                if (BABYLON.Vector3.Distance(bullet.position, xrCamera.position) > 50) {
+                    bullet.dispose();
+                }
+        });
+    }
+
+    scene.onPointerDown = () => {
+        shootBullet();
+    };
+
     // Start the render loop
     engine.runRenderLoop(() => {
         // const worldPosition = loadedModel.getAbsolutePosition();
@@ -117,6 +142,8 @@ const createXR = async () => {
         // console.log("Z: ", worldPosition.z);
         scene.render();
     });
+
+    
 };
 
 createXR();
