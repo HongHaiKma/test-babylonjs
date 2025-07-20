@@ -129,7 +129,7 @@ const createXR = async () => {
     // Create 10 boxes with colliders arranged in a circle around camera
     function createBoxCircle() {
         const numberOfBoxes = 10;
-        const radius = 10;
+        const radius = 2;
         const boxes: BABYLON.Mesh[] = [];
 
         for (let i = 0; i < numberOfBoxes; i++) {
