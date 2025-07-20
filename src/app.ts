@@ -127,9 +127,14 @@ const createXR = async () => {
         // Clone the bullet model
         const bullet = bulletModel.clone("bulletInstance", null);
         bullet.setEnabled(true);
-        bullet.position = xrCamera.position.clone();
-        const forward = xrCamera.getForwardRay().direction.normalize();
-        const speed = 0.1;
+        
+        // Set bullet start distance from camera (e.g., 2 units away)
+        const startDistance = 2.0;
+        const cameraForward = xrCamera.getForwardRay().direction.normalize();
+        bullet.position = xrCamera.position.clone().add(cameraForward.scale(startDistance));
+        
+        const forward = cameraForward.scale(3.5);
+        const speed = 0.5;
         // Move the bullet every frame
         const observer = scene.onBeforeRenderObservable.add(() => {
             bullet.position.addInPlace(forward.scale(speed));
