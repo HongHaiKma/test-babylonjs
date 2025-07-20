@@ -113,7 +113,7 @@ const createXR = async () => {
     let bulletModel: BABYLON.AbstractMesh | null = null;
     async function preloadBulletModel() {
         if (!bulletModel) {
-            const bulletUrl = "https://dl.dropbox.com/scl/fi/sy3d2do6230xr7d6m4qze/bullet.glb?rlkey=nyjocnqem4gk93ieozmpn5lx1&st=z3ryay9m";
+            const bulletUrl = "https://dl.dropbox.com/scl/fi/sy3d2do6230xr7d6m4qze/bullet.glb?rlkey=nyjocnqem4gk93ieozmpn5lx1&st=p1fhzsif";
             const result = await BABYLON.SceneLoader.ImportMeshAsync("", bulletUrl, "", scene);
             bulletModel = result.meshes[0];
             bulletModel.setEnabled(false); // Hide the template
