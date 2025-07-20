@@ -133,6 +133,9 @@ const createXR = async () => {
         const cameraForward = xrCamera.getForwardRay().direction.normalize();
         bullet.position = xrCamera.position.clone().add(cameraForward.scale(startDistance));
         
+        // Rotate bullet to face camera forward direction
+        bullet.lookAt(bullet.position.add(cameraForward));
+        
         const forward = cameraForward.scale(3.5);
         const speed = 0.5;
         // Move the bullet every frame
