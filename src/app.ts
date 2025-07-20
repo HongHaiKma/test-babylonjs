@@ -129,7 +129,7 @@ const createXR = async () => {
     // Create 10 boxes with colliders arranged in a circle around camera
     function createBoxCircle() {
         const numberOfBoxes = 10;
-        const radius = 3; // Reduced radius to make boxes more visible
+        const radius = 2; // Smaller radius
         const boxes: BABYLON.Mesh[] = [];
 
         for (let i = 0; i < numberOfBoxes; i++) {
@@ -137,37 +137,28 @@ const createXR = async () => {
             const angle = (i / numberOfBoxes) * 2 * Math.PI;
             
             // Create box
-            const box = BABYLON.MeshBuilder.CreateBox(`box_${i}`, { size: 1 }, scene);
+            const box = BABYLON.MeshBuilder.CreateBox(`box_${i}`, { size: 0.5 }, scene);
             
-            // Position box in circle around current device position
+            // Position box in circle - simple positioning in front of camera
             const x = Math.cos(angle) * radius;
-            const z = Math.sin(angle) * radius;
-            box.position = new BABYLON.Vector3(
-                xrCamera.position.x + x,
-                xrCamera.position.y, // Same height as device
-                xrCamera.position.z + z
-            );
+            const z = Math.sin(angle) * radius + 5; // Move forward 5 units from origin
+            box.position = new BABYLON.Vector3(x, 1.5, z); // Raised to eye level
             
-            // Create material for the box (makes them visible)
+            // Create very bright material for visibility
             const material = new BABYLON.StandardMaterial(`boxMaterial_${i}`, scene);
-            material.diffuseColor = new BABYLON.Color3(1, 0, 0); // Red color for visibility
-            material.emissiveColor = new BABYLON.Color3(0.2, 0, 0); // Slight glow
+            material.diffuseColor = new BABYLON.Color3(1, 1, 0); // Bright yellow
+            material.emissiveColor = new BABYLON.Color3(0.5, 0.5, 0); // Strong glow
             box.material = material;
             
+            console.log(`Box ${i} created at position:`, box.position);
             boxes.push(box);
         }
         
         return boxes;
     }
 
-    // Wait for XR session to be ready before creating boxes
-    xr.baseExperience.sessionManager.onXRSessionInit.add(() => {
-        // Create the boxes after XR session is initialized and camera position is set
-        setTimeout(() => {
-            const boxes = createBoxCircle();
-            console.log(`Created ${boxes.length} boxes around device position`);
-        }, 1000); // Small delay to ensure camera position is properly set
-    });
+    // Create boxes immediately - simpler approach
+    createBoxCircle();
 
     function shootBullet() {
         if (!bulletModel) return;
