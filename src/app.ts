@@ -122,6 +122,52 @@ const createXR = async () => {
 
     await preloadBulletModel();
 
+    // Create 10 boxes with colliders arranged in a circle around camera
+    function createBoxCircle() {
+        const numberOfBoxes = 10;
+        const radius = 10;
+        const boxes: BABYLON.Mesh[] = [];
+
+        for (let i = 0; i < numberOfBoxes; i++) {
+            // Calculate angle for each box
+            const angle = (i / numberOfBoxes) * 2 * Math.PI;
+            
+            // Create box
+            const box = BABYLON.MeshBuilder.CreateBox(`box_${i}`, { size: 1 }, scene);
+            
+            // Position box in circle around camera
+            const x = Math.cos(angle) * radius;
+            const z = Math.sin(angle) * radius;
+            box.position = new BABYLON.Vector3(
+                xrCamera.position.x + x,
+                xrCamera.position.y, // Same height as camera
+                xrCamera.position.z + z
+            );
+            
+            // Create material for the box (optional - makes them visible)
+            const material = new BABYLON.StandardMaterial(`boxMaterial_${i}`, scene);
+            material.diffuseColor = new BABYLON.Color3(Math.random(), Math.random(), Math.random());
+            box.material = material;
+            
+            // Enable physics collider
+            box.physicsImpostor = new BABYLON.PhysicsImpostor(box, BABYLON.PhysicsImpostor.BoxImpostor, { 
+                mass: 1, 
+                restitution: 0.7 
+            }, scene);
+            
+            boxes.push(box);
+        }
+        
+        return boxes;
+    }
+
+    // Enable physics engine for colliders
+    scene.enablePhysics(new BABYLON.Vector3(0, -9.81, 0), new BABYLON.CannonJSPlugin());
+    
+    // Create the boxes after XR is initialized
+    const boxes = createBoxCircle();
+    console.log(`Created ${boxes.length} boxes in circle formation`);
+
     function shootBullet() {
         if (!bulletModel) return;
         // Clone the bullet model
