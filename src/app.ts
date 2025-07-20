@@ -129,7 +129,7 @@ const createXR = async () => {
     // Create 10 boxes with colliders arranged in a circle around camera
     function createBoxCircle() {
         const numberOfBoxes = 10;
-        const radius = 2;
+        const radius = 3; // Reduced radius to make boxes more visible
         const boxes: BABYLON.Mesh[] = [];
 
         for (let i = 0; i < numberOfBoxes; i++) {
@@ -139,25 +139,20 @@ const createXR = async () => {
             // Create box
             const box = BABYLON.MeshBuilder.CreateBox(`box_${i}`, { size: 1 }, scene);
             
-            // Position box in circle around camera
+            // Position box in circle around current device position
             const x = Math.cos(angle) * radius;
             const z = Math.sin(angle) * radius;
             box.position = new BABYLON.Vector3(
                 xrCamera.position.x + x,
-                xrCamera.position.y, // Same height as camera
+                xrCamera.position.y, // Same height as device
                 xrCamera.position.z + z
             );
             
-            // Create material for the box (optional - makes them visible)
+            // Create material for the box (makes them visible)
             const material = new BABYLON.StandardMaterial(`boxMaterial_${i}`, scene);
-            material.diffuseColor = new BABYLON.Color3(Math.random(), Math.random(), Math.random());
+            material.diffuseColor = new BABYLON.Color3(1, 0, 0); // Red color for visibility
+            material.emissiveColor = new BABYLON.Color3(0.2, 0, 0); // Slight glow
             box.material = material;
-            
-            // Enable physics collider
-            box.physicsImpostor = new BABYLON.PhysicsImpostor(box, BABYLON.PhysicsImpostor.BoxImpostor, { 
-                mass: 1, 
-                restitution: 0.7 
-            }, scene);
             
             boxes.push(box);
         }
@@ -165,12 +160,14 @@ const createXR = async () => {
         return boxes;
     }
 
-    // Enable physics engine for colliders
-    scene.enablePhysics(new BABYLON.Vector3(0, -9.81, 0), new BABYLON.CannonJSPlugin());
-    
-    // Create the boxes after XR is initialized
-    const boxes = createBoxCircle();
-    console.log(`Created ${boxes.length} boxes in circle formation`);
+    // Wait for XR session to be ready before creating boxes
+    xr.baseExperience.sessionManager.onXRSessionInit.add(() => {
+        // Create the boxes after XR session is initialized and camera position is set
+        setTimeout(() => {
+            const boxes = createBoxCircle();
+            console.log(`Created ${boxes.length} boxes around device position`);
+        }, 1000); // Small delay to ensure camera position is properly set
+    });
 
     function shootBullet() {
         if (!bulletModel) return;
