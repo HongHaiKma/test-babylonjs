@@ -8,6 +8,7 @@ import { SceneLoader } from "@babylonjs/core/Loading/sceneLoader";
 import * as BABYLON from "@babylonjs/core";
 import "@babylonjs/core/XR/features/WebXRHitTest";
 import "@babylonjs/core/XR/features/WebXRAnchorSystem";
+import * as CANNON from "cannon";
 
 // Create and append canvas to the DOM
 var canvas = document.createElement("canvas");
@@ -162,7 +163,7 @@ const createXR = async () => {
     }
 
     // Enable physics engine for colliders
-    scene.enablePhysics(new BABYLON.Vector3(0, -9.81, 0), new BABYLON.CannonJSPlugin());
+    scene.enablePhysics(new BABYLON.Vector3(0, -9.81, 0), new BABYLON.CannonJSPlugin(true, 10, CANNON));
     
     // Create the boxes after XR is initialized
     const boxes = createBoxCircle();
