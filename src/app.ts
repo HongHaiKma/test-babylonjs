@@ -54,62 +54,48 @@ const createXR = async () => {
     const xrCamera = xr.baseExperience.camera;
     console.log("AR Camera ready:", xrCamera);
 
-    // Enable anchor feature
-    const anchorFeature = xr.baseExperience.featuresManager.enableFeature(
-        BABYLON.WebXRAnchorSystem.Name,
-        "latest"
-    ) as BABYLON.WebXRAnchorSystem;
+    // Modularized functions
+    // 1. Anchor setup
+    function setupAnchorSystem(xrCamera: BABYLON.Camera, loadedModel: BABYLON.AbstractMesh) {
+        const anchorFeature = xr.baseExperience.featuresManager.enableFeature(
+            BABYLON.WebXRAnchorSystem.Name,
+            "latest"
+        ) as BABYLON.WebXRAnchorSystem;
+        console.log("Anchor system compatibility:", anchorFeature.isCompatible());
+        let position = xrCamera.getForwardRay().direction.scale(3.5);
+        const observer = xr.baseExperience.sessionManager.onXRFrameObservable.add(() => {
+            anchorFeature.addAnchorAtPositionAndRotationAsync(position, BABYLON.Quaternion.Identity()).then((anchor) => {
+                console.log("Anchor created", anchor);
+                const node = new BABYLON.TransformNode("anchorNode", scene);
+                node.position = position;
+                node.rotationQuaternion = BABYLON.Quaternion.Identity();
+                anchor.attachedNode = node;
+                loadedModel.parent = node;
+                loadedModel.position = BABYLON.Vector3.Zero();
+                loadedModel.isVisible = true;
+                xr.baseExperience.sessionManager.onXRFrameObservable.remove(observer); // run once
+            });
+        });
+        // Log anchors
+        const anchors = anchorFeature.anchors;
+        console.log("Number of anchors:", anchors.length);
+        anchors.forEach((anchor) => {
+            console.log("Anchor:", anchor);
+        });
+    }
 
-    console.log("Anchor system compatibility:", anchorFeature.isCompatible());
-
-    let position = new Vector3();
-    position = xrCamera.getForwardRay().direction.scale(3.5);
-
-    const observer = xr.baseExperience.sessionManager.onXRFrameObservable.add(() => {
-        anchorFeature.addAnchorAtPositionAndRotationAsync(position, BABYLON.Quaternion.Identity()).then((anchor) => {
-            console.log("Anchor created", anchor);
-
-            const node = new BABYLON.TransformNode("anchorNode", scene);
-            node.position = position;
-            node.rotationQuaternion = BABYLON.Quaternion.Identity();
-
-            anchor.attachedNode = node;
-
-            loadedModel.parent = node;
-            loadedModel.position = BABYLON.Vector3.Zero();
-            loadedModel.isVisible = true;
-
-            xr.baseExperience.sessionManager.onXRFrameObservable.remove(observer); // run once
-        })
-    })
-
-    const anchors = anchorFeature.anchors;
-
-    // Log the number of anchors
-    console.log("Number of anchors:", anchors.length);
-
-    // List all anchors
-    anchors.forEach((anchor) => {
-        console.log("Anchor:", anchor);
-        // You can access anchor.attachedNode, anchor.id, etc.
-    });
-
-    // Preload bullet model from Dropbox
+    // 2. Bullet preloading
     let bulletModel: BABYLON.AbstractMesh | null = null;
     async function preloadBulletModel() {
         if (!bulletModel) {
             const bulletUrl = "https://dl.dropbox.com/scl/fi/sy3d2do6230xr7d6m4qze/bullet.glb?rlkey=nyjocnqem4gk93ieozmpn5lx1&st=p1fhzsif";
             const result = await BABYLON.SceneLoader.ImportMeshAsync("", bulletUrl, "", scene);
             bulletModel = result.meshes[0];
-            bulletModel.setEnabled(false); // Hide the template
+            bulletModel.setEnabled(false);
         }
     }
 
-    await preloadBulletModel();
-
-    // Create boxes in a circle
-    new BoxCircle(scene, 10, 2);
-
+    // 3. Bullet shooting
     function shootBullet() {
         if (!bulletModel) return;
         const cameraForward = xrCamera.getForwardRay().direction.normalize();
@@ -119,9 +105,21 @@ const createXR = async () => {
         new Bullet(bulletModel, startPosition, cameraForward, speed, scene);
     }
 
-    scene.onPointerDown = () => {
-        shootBullet();
-    };
+    // 4. Box circle creation
+    function createBoxCircle() {
+        new BoxCircle(scene, 10, 2);
+    }
+
+    // 5. Event binding
+    function bindEvents() {
+        scene.onPointerDown = shootBullet;
+    }
+
+    // --- Execute modularized logic ---
+    await preloadBulletModel();
+    createBoxCircle();
+    bindEvents();
+    setupAnchorSystem(xrCamera, loadedModel);
 
     engine.runRenderLoop(() => {
         // const worldPosition = loadedModel.getAbsolutePosition();
