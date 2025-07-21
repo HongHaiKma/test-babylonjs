@@ -13,6 +13,10 @@ export class BoxCircle {
             material.diffuseColor = new BABYLON.Color3(1, 1, 0);
             material.emissiveColor = new BABYLON.Color3(0.5, 0.5, 0);
             box.material = material;
+            
+            // Add physics impostor for collision detection
+            box.physicsImpostor = new BABYLON.PhysicsImpostor(box, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.7 }, scene);
+            
             this.boxes.push(box);
         }
     }

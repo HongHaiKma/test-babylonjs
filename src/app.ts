@@ -25,6 +25,9 @@ document.body.appendChild(canvas);
 const engine = new Engine(canvas, true);
 const scene = new Scene(engine);
 
+// Enable physics engine
+scene.enablePhysics(new BABYLON.Vector3(0, -9.81, 0), new BABYLON.CannonJSPlugin());
+
 // Add a light to the scene
 const light = new HemisphericLight("light", new Vector3(0, 1, 0), scene);
 
@@ -90,8 +93,12 @@ const createXR = async () => {
         if (!bulletModel) {
             const bulletUrl = "https://dl.dropbox.com/scl/fi/sy3d2do6230xr7d6m4qze/bullet.glb?rlkey=nyjocnqem4gk93ieozmpn5lx1&st=p1fhzsif";
             const result = await BABYLON.SceneLoader.ImportMeshAsync("", bulletUrl, "", scene);
-            bulletModel = result.meshes[0];
-            bulletModel.setEnabled(false);
+            if (result.meshes[0]) {
+                bulletModel = result.meshes[0];
+                bulletModel.setEnabled(false);
+            } else {
+                console.error("Failed to load bullet model");
+            }
         }
     }
 
@@ -119,7 +126,7 @@ const createXR = async () => {
     await preloadBulletModel();
     createBoxCircle();
     bindEvents();
-    setupAnchorSystem(xrCamera, loadedModel);
+    // setupAnchorSystem(xrCamera, loadedModel); // Commented out until loadedModel is properly initialized
 
     engine.runRenderLoop(() => {
         // const worldPosition = loadedModel.getAbsolutePosition();
