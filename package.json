@@ -19,7 +19,6 @@
   },
   "homepage": "https://HongHaiKma.github.io/test-babylonjs",
   "dependencies": {
-    "@babylonjs/havok": "^1.3.10",
     "@babylonjs/loaders": "^8.16.3",
     "cannon": "^0.6.2"
   }
