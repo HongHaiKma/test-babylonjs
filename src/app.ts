@@ -10,10 +10,16 @@ import { SceneLoader } from "@babylonjs/core/Loading/sceneLoader";
 import * as BABYLON from "@babylonjs/core";
 import "@babylonjs/core/XR/features/WebXRHitTest";
 import "@babylonjs/core/XR/features/WebXRAnchorSystem";
-import * as CANNON from "cannon";
+import HavokPhysics from "@babylonjs/havok";
 
-// Make CANNON available globally
-(window as any).CANNON = CANNON;
+// Initialize Havok Physics
+let havokInstance: any;
+
+// Initialize Havok physics engine
+const initializePhysics = async () => {
+    havokInstance = await HavokPhysics();
+    return havokInstance;
+};
 
 // Create and append canvas to the DOM
 var canvas = document.createElement("canvas");
@@ -25,8 +31,7 @@ document.body.appendChild(canvas);
 const engine = new Engine(canvas, true);
 const scene = new Scene(engine);
 
-// Enable physics engine
-// scene.enablePhysics(new BABYLON.Vector3(0, -9.81, 0), new BABYLON.CannonJSPlugin());
+// Initialize physics will be done in createXR function
 
 // Add a light to the scene
 const light = new HemisphericLight("light", new Vector3(0, 1, 0), scene);
@@ -35,6 +40,14 @@ let loadedModel: AbstractMesh;
 
 // Function to start the AR experience
 const createXR = async () => {
+    // Initialize Havok Physics first
+    console.log("Initializing Havok Physics...");
+    const havokInstance = await initializePhysics();
+    
+    // Enable physics with Havok
+    scene.enablePhysics(null, new BABYLON.HavokPlugin(true, havokInstance));
+    console.log("Havok Physics enabled");
+    
     // Check if immersive-ar sessions are supported
     const arAvailable = await WebXRSessionManager.IsSessionSupportedAsync("immersive-ar");
     console.log("AR available:", arAvailable);
