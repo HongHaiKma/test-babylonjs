@@ -25,7 +25,7 @@ document.body.appendChild(canvas);
 const engine = new Engine(canvas, true);
 const scene = new Scene(engine);
 
-// Enable physics engine
+// Enable physics engine with no gravity (0, 0, 0) instead of (0, -9.81, 0)
 scene.enablePhysics(new BABYLON.Vector3(0, 0, 0), new BABYLON.CannonJSPlugin());
 
 // Add a light to the scene

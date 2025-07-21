@@ -20,8 +20,13 @@ export class Bullet {
         this.speed = speed;
         this.scene = scene;
         
-        // Add physics impostor for collision detection
-        this.mesh.physicsImpostor = new BABYLON.PhysicsImpostor(this.mesh, BABYLON.PhysicsImpostor.SphereImpostor, { mass: 1, restitution: 0.3 }, scene);
+        // Add physics impostor for collision detection (mass 0 = not affected by gravity)
+        this.mesh.physicsImpostor = new BABYLON.PhysicsImpostor(this.mesh, BABYLON.PhysicsImpostor.SphereImpostor, { mass: 0, restitution: 0.3 }, scene);
+        
+        // Alternative: If you want mass but no gravity, use this instead:
+        // this.mesh.physicsImpostor = new BABYLON.PhysicsImpostor(this.mesh, BABYLON.PhysicsImpostor.SphereImpostor, { mass: 1, restitution: 0.3 }, scene);
+        // this.mesh.physicsImpostor.physicsBody.material.friction = 0;
+        // this.mesh.physicsImpostor.physicsBody.material.restitution = 0.3;
         
         // Set initial velocity using physics
         const initialVelocity = forward.scale(speed * 20);
