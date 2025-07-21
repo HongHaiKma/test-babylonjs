@@ -21,17 +21,17 @@ export class Bullet {
         this.scene = scene;
         
         // Add physics impostor for collision detection (mass 0 = not affected by gravity)
-        this.mesh.physicsImpostor = new BABYLON.PhysicsImpostor(this.mesh, BABYLON.PhysicsImpostor.SphereImpostor, { mass: 0, restitution: 0.3 }, scene);
+        this.mesh.physicsImpostor = new BABYLON.PhysicsImpostor(this.mesh, BABYLON.PhysicsImpostor.SphereImpostor, { mass: 1, restitution: 0.3 }, scene);
         
-        // Alternative: If you want mass but no gravity, use this instead:
+        // Alternative: If you want physics movement, use mass > 0 and disable gravity per object:
         // this.mesh.physicsImpostor = new BABYLON.PhysicsImpostor(this.mesh, BABYLON.PhysicsImpostor.SphereImpostor, { mass: 1, restitution: 0.3 }, scene);
         // this.mesh.physicsImpostor.physicsBody.material.friction = 0;
-        // this.mesh.physicsImpostor.physicsBody.material.restitution = 0.3;
+        // this.mesh.physicsImpostor.physicsBody.fixedRotation = true; // Prevent spinning
         
-        // Set initial velocity using physics
+        // Set initial velocity using physics (won't work with mass 0, so we use manual movement instead)
         const initialVelocity = forward.scale(speed * 20);
         console.log("Setting bullet velocity:", initialVelocity);
-        this.mesh.physicsImpostor.setLinearVelocity(initialVelocity);
+        this.mesh.physicsImpostor.setLinearVelocity(initialVelocity); // Disabled because mass = 0
         
         // Log initial position
         console.log("Bullet created at:", this.mesh.position);
@@ -60,11 +60,8 @@ export class Bullet {
             }
         }
         
-        // Use physics movement primarily, fallback to manual if needed
-        // if (!this.mesh.physicsImpostor || this.mesh.physicsImpostor.getLinearVelocity().length() < 0.1) {
-        //     console.log("Using manual movement fallback");
-            // this.mesh.position.addInPlace(this.forward.scale(this.speed));
-        // }
+        // Use manual movement since mass 0 disables physics movement
+        // this.mesh.position.addInPlace(this.forward.scale(this.speed));
         
         // Dispose bullet if too far from origin
         if (BABYLON.Vector3.Distance(this.mesh.position, BABYLON.Vector3.Zero()) > 50) {
