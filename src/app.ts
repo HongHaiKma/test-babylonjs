@@ -26,7 +26,7 @@ const engine = new Engine(canvas, true);
 const scene = new Scene(engine);
 
 // Enable physics engine
-// scene.enablePhysics(new BABYLON.Vector3(0, -9.81, 0), new BABYLON.CannonJSPlugin());
+scene.enablePhysics(null, new BABYLON.CannonJSPlugin());
 
 // Add a light to the scene
 const light = new HemisphericLight("light", new Vector3(0, 1, 0), scene);

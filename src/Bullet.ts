@@ -26,7 +26,7 @@ export class Bullet {
         // Set initial velocity using physics
         const initialVelocity = forward.scale(speed * 20);
         console.log("Setting bullet velocity:", initialVelocity);
-        // this.mesh.physicsImpostor.setLinearVelocity(initialVelocity);
+        this.mesh.physicsImpostor.setLinearVelocity(initialVelocity);
         
         // Log initial position
         console.log("Bullet created at:", this.mesh.position);
@@ -58,7 +58,7 @@ export class Bullet {
         // Use physics movement primarily, fallback to manual if needed
         // if (!this.mesh.physicsImpostor || this.mesh.physicsImpostor.getLinearVelocity().length() < 0.1) {
         //     console.log("Using manual movement fallback");
-            this.mesh.position.addInPlace(this.forward.scale(this.speed));
+            // this.mesh.position.addInPlace(this.forward.scale(this.speed));
         // }
         
         // Dispose bullet if too far from origin
