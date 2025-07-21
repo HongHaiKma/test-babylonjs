@@ -54,38 +54,18 @@ const createXR = async () => {
     const xrCamera = xr.baseExperience.camera;
     console.log("AR Camera ready:", xrCamera);
 
-    const loadModel = async () => {
-        // const modelUrl = "https://xensear-arworld.s3.ap-southeast-5.amazonaws.com/ar-world/AssetBundles/BabylonModelTest/";
-        // const modelUrl = "https://dl.dropbox.com/scl/fi/h0e15ypqmcm8f63gq3tzl/RingRing.glb?rlkey=1jnot0nw8rl22voz55fv4542l&st=0rihhho0";
-        const modelUrl = "https://dl.dropbox.com/scl/fi/sy3d2do6230xr7d6m4qze/bullet.glb?rlkey=nyjocnqem4gk93ieozmpn5lx1&st=z3ryay9m";
-        
-        // const fileName = "RingRing.glb";
-        const fileName = "bullet.glb";
-        const result = await SceneLoader.ImportMeshAsync("", modelUrl, "", scene);
-        loadedModel = result.meshes[0];
-        // loadedModel.position = xrCamera.position.add(xrCamera.getForwardRay().direction.scale(3.5));
-    };
+    // Enable anchor feature
+    const anchorFeature = xr.baseExperience.featuresManager.enableFeature(
+        BABYLON.WebXRAnchorSystem.Name,
+        "latest"
+    ) as BABYLON.WebXRAnchorSystem;
 
-    await loadModel();
+    console.log("Anchor system compatibility:", anchorFeature.isCompatible());
 
-    console.log("Model loaded");
+    let position = new Vector3();
+    position = xrCamera.getForwardRay().direction.scale(3.5);
 
-    // const hitTest = xr.baseExperience.featuresManager.enableFeature(
-    //     "hit-test",
-    // Preload bullet model from Dropbox
-    let bulletModel: BABYLON.AbstractMesh | null = null;
-    async function preloadBulletModel() {
-        if (!bulletModel) {
-            const bulletUrl = "https://dl.dropbox.com/scl/fi/sy3d2do6230xr7d6m4qze/bullet.glb?rlkey=nyjocnqem4gk93ieozmpn5lx1&st=p1fhzsif";
-            const result = await BABYLON.SceneLoader.ImportMeshAsync("", bulletUrl, "", scene);
-            bulletModel = result.meshes[0];
-            bulletModel.setEnabled(false); // Hide the template
-        }
-    }
-
-    await preloadBulletModel();
-
-    console.log("Bullet model loaded");
+    const observer = xr.baseExperience.sessionManager.onXRFrameObservable.add(() => {
         anchorFeature.addAnchorAtPositionAndRotationAsync(position, BABYLON.Quaternion.Identity()).then((anchor) => {
             console.log("Anchor created", anchor);
 
