@@ -20,8 +20,18 @@ export class Bullet {
         this.speed = speed;
         this.scene = scene;
         
-        // Add physics impostor for collision detection (mass 0 = not affected by gravity)
-        this.mesh.physicsImpostor = new BABYLON.PhysicsImpostor(this.mesh, BABYLON.PhysicsImpostor.SphereImpostor, { mass: 1, restitution: 0.3 }, scene);
+        // Add physics impostor for collision detection with larger collision sphere
+        this.mesh.physicsImpostor = new BABYLON.PhysicsImpostor(this.mesh, BABYLON.PhysicsImpostor.SphereImpostor, { 
+            mass: 1, 
+            restitution: 0.3,
+            friction: 0
+        }, scene);
+        
+        // Make the collision sphere larger than the visual mesh
+        if (this.mesh.physicsImpostor.physicsBody) {
+            // Scale up the collision sphere for better hit detection
+            this.mesh.physicsImpostor.physicsBody.shapes[0].radius *= 2.0;
+        }
         
         // Alternative: If you want physics movement, use mass > 0 and disable gravity per object:
         // this.mesh.physicsImpostor = new BABYLON.PhysicsImpostor(this.mesh, BABYLON.PhysicsImpostor.SphereImpostor, { mass: 1, restitution: 0.3 }, scene);
@@ -29,9 +39,9 @@ export class Bullet {
         // this.mesh.physicsImpostor.physicsBody.fixedRotation = true; // Prevent spinning
         
         // Set initial velocity using physics (won't work with mass 0, so we use manual movement instead)
-        const initialVelocity = forward.scale(speed * 20);
-        console.log("Setting bullet velocity:", initialVelocity);
-        this.mesh.physicsImpostor.setLinearVelocity(initialVelocity); // Disabled because mass = 0
+        // const initialVelocity = forward.scale(speed * 20);
+        // console.log("Setting bullet velocity:", initialVelocity);
+        // this.mesh.physicsImpostor.setLinearVelocity(initialVelocity); // Disabled because mass = 0
         
         // Log initial position
         console.log("Bullet created at:", this.mesh.position);
@@ -49,11 +59,15 @@ export class Bullet {
             }
         }
         
-        // Check for intersections with other meshes (collision detection)
+        // Check for intersections with other meshes (improved collision detection)
         const boxes = this.scene.meshes.filter(mesh => mesh.name.startsWith("box_"));
         for (const box of boxes) {
-            if (this.mesh.intersectsMesh(box as BABYLON.AbstractMesh, false)) {
-                console.log("Bullet hit:", box.name);
+            // Use distance-based collision detection for better accuracy
+            const distance = BABYLON.Vector3.Distance(this.mesh.position, box.position);
+            const collisionThreshold = 1.0; // Adjust this value as needed
+            
+            if (distance < collisionThreshold || this.mesh.intersectsMesh(box as BABYLON.AbstractMesh, false)) {
+                console.log("Bullet hit:", box.name, "Distance:", distance);
                 box.dispose();
                 this.dispose();
                 return;
@@ -61,7 +75,7 @@ export class Bullet {
         }
         
         // Use manual movement since mass 0 disables physics movement
-        // this.mesh.position.addInPlace(this.forward.scale(this.speed));
+        this.mesh.position.addInPlace(this.forward.scale(this.speed));
         
         // Dispose bullet if too far from origin
         if (BABYLON.Vector3.Distance(this.mesh.position, BABYLON.Vector3.Zero()) > 50) {
