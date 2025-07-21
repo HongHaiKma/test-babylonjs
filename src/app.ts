@@ -1,4 +1,6 @@
 import { Engine, Scene, Vector3, HemisphericLight, MeshBuilder, AbstractMesh } from "@babylonjs/core";
+import { Bullet } from "./Bullet";
+import { BoxCircle } from "./BoxCircle";
 import { WebXRDefaultExperience } from "@babylonjs/core/XR/webXRDefaultExperience";
 import { WebXRSessionManager } from "@babylonjs/core/XR/webXRSessionManager";
 import "@babylonjs/core/Debug/debugLayer";
@@ -70,21 +72,20 @@ const createXR = async () => {
 
     // const hitTest = xr.baseExperience.featuresManager.enableFeature(
     //     "hit-test",
-    //     "latest"
-    // ) as BABYLON.WebXRHitTest;
+    // Preload bullet model from Dropbox
+    let bulletModel: BABYLON.AbstractMesh | null = null;
+    async function preloadBulletModel() {
+        if (!bulletModel) {
+            const bulletUrl = "https://dl.dropbox.com/scl/fi/sy3d2do6230xr7d6m4qze/bullet.glb?rlkey=nyjocnqem4gk93ieozmpn5lx1&st=p1fhzsif";
+            const result = await BABYLON.SceneLoader.ImportMeshAsync("", bulletUrl, "", scene);
+            bulletModel = result.meshes[0];
+            bulletModel.setEnabled(false); // Hide the template
+        }
+    }
 
-    // Enable anchor feature
-    const anchorFeature = xr.baseExperience.featuresManager.enableFeature(
-        BABYLON.WebXRAnchorSystem.Name,
-        "latest"
-    ) as BABYLON.WebXRAnchorSystem;
+    await preloadBulletModel();
 
-    console.log("Anchor system compatibility:", anchorFeature.isCompatible());
-
-    let position = new Vector3();
-    position = xrCamera.getForwardRay().direction.scale(3.5);
-
-    const observer = xr.baseExperience.sessionManager.onXRFrameObservable.add(() => {
+    console.log("Bullet model loaded");
         anchorFeature.addAnchorAtPositionAndRotationAsync(position, BABYLON.Quaternion.Identity()).then((anchor) => {
             console.log("Anchor created", anchor);
 
@@ -126,71 +127,22 @@ const createXR = async () => {
 
     await preloadBulletModel();
 
-    // Create 10 boxes with colliders arranged in a circle around camera
-    function createBoxCircle() {
-        const numberOfBoxes = 10;
-        const radius = 2; // Smaller radius
-        const boxes: BABYLON.Mesh[] = [];
-
-        for (let i = 0; i < numberOfBoxes; i++) {
-            // Calculate angle for each box
-            const angle = (i / numberOfBoxes) * 2 * Math.PI;
-            
-            // Create box
-            const box = BABYLON.MeshBuilder.CreateBox(`box_${i}`, { size: 0.5 }, scene);
-            
-            // Position box in circle - simple positioning in front of camera
-            const x = Math.cos(angle) * radius;
-            const z = Math.sin(angle) * radius + 5; // Move forward 5 units from origin
-            box.position = new BABYLON.Vector3(x, 1.5, z); // Raised to eye level
-            
-            // Create very bright material for visibility
-            const material = new BABYLON.StandardMaterial(`boxMaterial_${i}`, scene);
-            material.diffuseColor = new BABYLON.Color3(1, 1, 0); // Bright yellow
-            material.emissiveColor = new BABYLON.Color3(0.5, 0.5, 0); // Strong glow
-            box.material = material;
-            
-            console.log(`Box ${i} created at position:`, box.position);
-            boxes.push(box);
-        }
-        
-        return boxes;
-    }
-
-    // Create boxes immediately - simpler approach
-    createBoxCircle();
+    // Create boxes in a circle
+    new BoxCircle(scene, 10, 2);
 
     function shootBullet() {
         if (!bulletModel) return;
-        // Clone the bullet model
-        const bullet = bulletModel.clone("bulletInstance", null);
-        bullet.setEnabled(true);
-        
-        // Set bullet start distance from camera (e.g., 2 units away)
-        const startDistance = 2.0;
         const cameraForward = xrCamera.getForwardRay().direction.normalize();
-        bullet.position = xrCamera.position.clone().add(cameraForward.scale(startDistance));
-        
-        // Rotate bullet to face camera forward direction
-        bullet.lookAt(bullet.position.add(cameraForward));
-        
-        const forward = cameraForward.scale(3.5);
+        const startDistance = 2.0;
+        const startPosition = xrCamera.position.clone().add(cameraForward.scale(startDistance));
         const speed = 0.5;
-        // Move the bullet every frame
-        const observer = scene.onBeforeRenderObservable.add(() => {
-            bullet.position.addInPlace(forward.scale(speed));
-            if (BABYLON.Vector3.Distance(bullet.position, xrCamera.position) > 50) {
-                bullet.dispose();
-                scene.onBeforeRenderObservable.remove(observer);
-            }
-        });
+        new Bullet(bulletModel, startPosition, cameraForward, speed, scene);
     }
 
     scene.onPointerDown = () => {
         shootBullet();
     };
 
-    // Start the render loop
     engine.runRenderLoop(() => {
         // const worldPosition = loadedModel.getAbsolutePosition();
         // console.log("X: ", worldPosition.x);
