@@ -45,7 +45,7 @@ const createXR = async () => {
     const havokInstance = await initializePhysics();
     
     // Enable physics with Havok
-    scene.enablePhysics(null, new BABYLON.HavokPlugin(true, havokInstance));
+    scene.enablePhysics(new BABYLON.Vector3(0, -9.81, 0), new BABYLON.HavokPlugin(true, havokInstance));
     console.log("Havok Physics enabled");
     
     // Check if immersive-ar sessions are supported
