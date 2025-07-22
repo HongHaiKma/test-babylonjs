@@ -24,6 +24,7 @@ document.body.appendChild(canvas);
 // Initialize the engine and scene
 const engine = new Engine(canvas, true);
 const scene = new Scene(engine);
+scene.collisionsEnabled = true;
 
 // Enable physics engine with no gravity (0, 0, 0) instead of (0, -9.81, 0)
 scene.enablePhysics(new BABYLON.Vector3(0, 0, 0), new BABYLON.CannonJSPlugin());
