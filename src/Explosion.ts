@@ -21,7 +21,7 @@ export class Explosion {
         this.particleSystem.emitter = this.emitter;
         
         // Create particle texture (simple colored particle)
-        this.createParticleTexture();
+        // this.createParticleTexture();
         
         // Configure particle system
         this.setupParticleSystem();
@@ -33,74 +33,56 @@ export class Explosion {
         this.explode();
     }
     
-    createParticleTexture() {
-        // Create a simple circular texture for particles
-        const texture = new BABYLON.DynamicTexture("explosionTexture", 64, this.scene);
-        const context = texture.getContext();
+    // createParticleTexture() {
+    //     // Create a simple circular texture for particles
+    //     const texture = new BABYLON.DynamicTexture("explosionTexture", 64, this.scene);
+    //     const context = texture.getContext();
         
-        // Draw a gradient circle
-        const gradient = context.createRadialGradient(32, 32, 0, 32, 32, 32);
-        gradient.addColorStop(0, "rgba(255, 100, 0, 1)");    // Orange center
-        gradient.addColorStop(0.5, "rgba(255, 50, 0, 0.8)"); // Red middle
-        gradient.addColorStop(1, "rgba(255, 0, 0, 0)");      // Transparent edge
+    //     // Draw a gradient circle
+    //     const gradient = context.createRadialGradient(32, 32, 0, 32, 32, 32);
+    //     gradient.addColorStop(0, "rgba(255, 100, 0, 1)");    // Orange center
+    //     gradient.addColorStop(0.5, "rgba(255, 50, 0, 0.8)"); // Red middle
+    //     gradient.addColorStop(1, "rgba(255, 0, 0, 0)");      // Transparent edge
         
-        context.fillStyle = gradient;
-        context.fillRect(0, 0, 64, 64);
-        texture.update();
+    //     context.fillStyle = gradient;
+    //     context.fillRect(0, 0, 64, 64);
+    //     texture.update();
         
-        this.particleSystem.particleTexture = texture;
-    }
+    //     this.particleSystem.particleTexture = texture;
+    // }
     
     setupParticleSystem() {
-        // Particle emission
-        this.particleSystem.minEmitBox = new BABYLON.Vector3(-0.1, -0.1, -0.1);
-        this.particleSystem.maxEmitBox = new BABYLON.Vector3(0.1, 0.1, 0.1);
-        
-        // Colors - bright explosion colors
-        this.particleSystem.color1 = new BABYLON.Color4(1, 0.8, 0, 1.0);  // Bright orange
-        this.particleSystem.color2 = new BABYLON.Color4(1, 0.2, 0, 1.0);  // Bright red
-        this.particleSystem.colorDead = new BABYLON.Color4(0.3, 0.3, 0.3, 0.0); // Dark gray and transparent
-        
-        // Size - make particles more visible
-        this.particleSystem.minSize = 0.1;
-        this.particleSystem.maxSize = 0.4;
-        
-        // Life time
-        this.particleSystem.minLifeTime = 0.5;
-        this.particleSystem.maxLifeTime = 1.2;
-        
-        // Emission rate - burst effect
-        this.particleSystem.emitRate = 300;
-        
-        // Blend mode for bright effect
-        this.particleSystem.blendMode = BABYLON.ParticleSystem.BLENDMODE_ONEONE;
-        
-        // Gravity and direction for realistic explosion
-        this.particleSystem.gravity = new BABYLON.Vector3(0, -9.81, 0);
-        this.particleSystem.direction1 = new BABYLON.Vector3(-3, 1, -3);
-        this.particleSystem.direction2 = new BABYLON.Vector3(3, 6, 3);
-        
-        // Speed for explosive effect
-        this.particleSystem.minEmitPower = 3;
-        this.particleSystem.maxEmitPower = 8;
-        this.particleSystem.updateSpeed = 0.005; // Faster updates for smoother animation
-        
-        // Angular velocity for spinning particles
-        this.particleSystem.minAngularSpeed = -Math.PI;
-        this.particleSystem.maxAngularSpeed = Math.PI;
-        
-        // Create spherical emission for 360-degree explosion
-        this.particleSystem.createSphereEmitter(0.3);
-        
-        // Add size animation over lifetime
-        this.particleSystem.addSizeGradient(0, 0.2);    // Start small
-        this.particleSystem.addSizeGradient(0.3, 1.0);  // Grow to full size
-        this.particleSystem.addSizeGradient(1.0, 0.1);  // Shrink at end
-        
-        // Add color animation over lifetime
-        this.particleSystem.addColorGradient(0, new BABYLON.Color4(1, 1, 0.5, 1));    // Bright yellow start
-        this.particleSystem.addColorGradient(0.4, new BABYLON.Color4(1, 0.5, 0, 1));  // Orange middle
-        this.particleSystem.addColorGradient(1.0, new BABYLON.Color4(0.5, 0, 0, 0));  // Dark red end (transparent)
+        // Particle system
+        var particleSystem = new BABYLON.ParticleSystem("explosion", 200, this.scene);
+        particleSystem.particleTexture = new BABYLON.Texture("https://playground.babylonjs.com/textures/flare.png", this.scene);
+
+        particleSystem.emitter = new BABYLON.Vector3(0, 0, 0);
+        particleSystem.minEmitBox = new BABYLON.Vector3(0, 0, 0);
+        particleSystem.maxEmitBox = new BABYLON.Vector3(0, 0, 0);
+
+        particleSystem.color1 = new BABYLON.Color4(1, 0.5, 0, 1);
+        particleSystem.color2 = new BABYLON.Color4(1, 1, 0.2, 1);
+        particleSystem.colorDead = new BABYLON.Color4(0, 0, 0, 0);
+
+        particleSystem.minSize = 0.2;
+        particleSystem.maxSize = 0.4;
+
+        particleSystem.minLifeTime = 0.05;
+        particleSystem.maxLifeTime = 0.2;
+
+        particleSystem.emitRate = 0;
+        particleSystem.blendMode = BABYLON.ParticleSystem.BLENDMODE_ONEONE;
+
+        particleSystem.gravity = new BABYLON.Vector3(0, 0, 0);
+        particleSystem.direction1 = new BABYLON.Vector3(-5, 1, -5);
+        particleSystem.direction2 = new BABYLON.Vector3(5, -1, 5);
+
+        particleSystem.minAngularSpeed = 0;
+        particleSystem.maxAngularSpeed = Math.PI;
+
+        particleSystem.minEmitPower = 3;
+        particleSystem.maxEmitPower = 6;
+        particleSystem.updateSpeed = 0.01;
     }
     
     private loadExplosionSound() {
