@@ -1,4 +1,5 @@
 import * as BABYLON from "@babylonjs/core";
+import { Explosion } from "./Explosion";
 
 export class Bullet {
     mesh: BABYLON.AbstractMesh;
@@ -33,25 +34,6 @@ export class Bullet {
             this.handleCollisionWithMesh(collidedMesh);
         });
         
-        // Alternative: You can also use onCollisionPositionChangeObservable for more detailed collision info
-        // this.mesh.onCollisionPositionChangeObservable.add((collisionInfo) => {
-        //     console.log("Collision position changed:", collisionInfo);
-        // });
-        
-        // Optional: Add physics impostor for visual debugging (can be removed if not needed)
-        // this.mesh.physicsImpostor = new BABYLON.PhysicsImpostor(this.mesh, BABYLON.PhysicsImpostor.SphereImpostor, { 
-        //     mass: 1, 
-        //     restitution: 0.3,
-        //     friction: 0
-        // }, scene);
-        
-        // // Make the collision sphere larger than the visual mesh
-        // if (this.mesh.physicsImpostor.physicsBody) {
-        //     // Scale up the collision sphere for better hit detection
-        //     this.mesh.physicsImpostor.physicsBody.shapes[0].radius *= 2.0;
-        // }
-
-        
         // Log initial position
         console.log("Bullet created at:", this.mesh.position);
         
@@ -82,16 +64,21 @@ export class Bullet {
         const distance = BABYLON.Vector3.Distance(this.mesh.position, collidedMesh.position);
         console.log("Bullet hit:", collidedMesh.name, "at distance:", distance);
         
+        // Create explosion at collision point
+        const explosionPosition = this.mesh.position.clone();
+        Explosion.createExplosion(explosionPosition, this.scene);
+        
         // Destroy the collided object if it's a box
         if (collidedMesh.name.startsWith("box_")) {
             console.log("Destroying box:", collidedMesh.name);
-            collidedMesh.dispose();
+            
+            // Small delay before destroying box to let explosion start
+            setTimeout(() => {
+                if (collidedMesh && !collidedMesh.isDisposed()) {
+                    collidedMesh.dispose();
+                }
+            }, 50);
         }
-        
-        // You can add different collision responses based on object type
-        // if (collidedMesh.name.startsWith("wall_")) {
-        //     console.log("Bullet hit wall - just destroy bullet");
-        // }
         
         // Destroy the bullet
         this.dispose();

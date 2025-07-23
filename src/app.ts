@@ -1,6 +1,7 @@
 import { Engine, Scene, Vector3, HemisphericLight, MeshBuilder, AbstractMesh } from "@babylonjs/core";
 import { Bullet } from "./Bullet";
 import { BoxCircle } from "./BoxCircle";
+import { Explosion } from "./Explosion";
 import { WebXRDefaultExperience } from "@babylonjs/core/XR/webXRDefaultExperience";
 import { WebXRSessionManager } from "@babylonjs/core/XR/webXRSessionManager";
 import "@babylonjs/core/Debug/debugLayer";
@@ -33,6 +34,37 @@ scene.enablePhysics(new BABYLON.Vector3(0, 0, 0), new BABYLON.CannonJSPlugin());
 const light = new HemisphericLight("light", new Vector3(0, 1, 0), scene);
 
 let loadedModel: AbstractMesh;
+
+// Camera shake effect function
+function shakeCamera(camera: BABYLON.Camera, intensity: number = 0.1, duration: number = 300) {
+    const originalPosition = camera.position.clone();
+    const shakeInterval = 16; // ~60fps
+    const shakeSteps = duration / shakeInterval;
+    let currentStep = 0;
+    
+    const shakeTimer = setInterval(() => {
+        currentStep++;
+        const progress = currentStep / shakeSteps;
+        const currentIntensity = intensity * (1 - progress); // Decrease intensity over time
+        
+        // Random shake offset
+        const shakeX = (Math.random() - 0.5) * currentIntensity;
+        const shakeY = (Math.random() - 0.5) * currentIntensity;
+        const shakeZ = (Math.random() - 0.5) * currentIntensity;
+        
+        camera.position.x = originalPosition.x + shakeX;
+        camera.position.y = originalPosition.y + shakeY;
+        camera.position.z = originalPosition.z + shakeZ;
+        
+        if (currentStep >= shakeSteps) {
+            clearInterval(shakeTimer);
+            camera.position = originalPosition; // Reset to original position
+        }
+    }, shakeInterval);
+}
+
+// Export the shake function for use in other modules
+(window as any).shakeCamera = shakeCamera;
 
 // Function to start the AR experience
 const createXR = async () => {
