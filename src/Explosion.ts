@@ -86,22 +86,53 @@ export class Explosion {
     }
     
     private loadExplosionSound() {
+        // Array of sound URLs to try (with fallbacks)
+        const soundUrls = [
+            // Your primary Dropbox URL
+            "https://dl.dropbox.com/scl/fi/YOUR_FILE_ID/explosion.mp3?rlkey=YOUR_RLKEY&st=YOUR_ST",
+            // Fallback public URL
+            "https://www.soundjay.com/misc/sounds/explosion_x.wav",
+            // Another fallback
+            "https://opengameart.org/sites/default/files/explosion.wav"
+        ];
+        
+        this.tryLoadSound(soundUrls, 0);
+    }
+    
+    private tryLoadSound(urls: string[], index: number) {
+        if (index >= urls.length) {
+            console.warn("All explosion sound URLs failed to load");
+            return;
+        }
+        
         try {
-            // Use a synthetic explosion sound effect (data URL)
-            // This creates a short burst of noise that sounds like an explosion
             this.explosionSound = new BABYLON.Sound(
                 "explosionSound",
-                "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvGIZCixs1O/FdicBGHLh9tmSOAcYYLTp66hVEQpGn+DyvGIZCixs1O/FdicBGHLh9tmSOAcYYLTp66hVEQpGn+DyvGIZCixs1O/FdicBGHLh9tmSOAcYYLTp66hVEQpGn+DyvGIZCi", 
+                urls[index],
                 this.scene,
-                null,
+                () => {
+                    console.log(`✅ Explosion sound loaded from: ${urls[index]}`);
+                },
                 {
-                    volume: 0.3,
+                    volume: 0.5,
                     spatialSound: true,
-                    maxDistance: 10
+                    maxDistance: 15,
+                    autoplay: false,
+                    loop: false
                 }
             );
+            
+            // Check if sound failed to load and try next URL
+            this.explosionSound.onEndedObservable.add(() => {
+                if (!this.explosionSound?.isReady) {
+                    console.warn(`Failed to load sound from: ${urls[index]}, trying next...`);
+                    this.tryLoadSound(urls, index + 1);
+                }
+            });
+            
         } catch (error) {
-            console.warn("Could not load explosion sound:", error);
+            console.warn(`Error loading sound from ${urls[index]}:`, error);
+            this.tryLoadSound(urls, index + 1);
         }
     }
     
@@ -183,6 +214,11 @@ export class Explosion {
         if (this.particleSystem) {
             this.particleSystem.stop();
             this.particleSystem.dispose();
+        }
+        
+        // Dispose sound
+        if (this.explosionSound) {
+            this.explosionSound.dispose();
         }
         
         // Dispose emitter mesh

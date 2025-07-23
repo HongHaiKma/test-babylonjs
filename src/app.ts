@@ -129,10 +129,14 @@ const createXR = async () => {
             if (result.meshes[0]) {
                 bulletModel = result.meshes[0];
                 bulletModel.setEnabled(false);
+                console.log("✅ Bullet model loaded successfully");
             } else {
                 console.error("Failed to load bullet model");
             }
         }
+        
+        // Preload shooting sound
+        await Bullet.loadShootSound(scene);
     }
 
     // 3. Bullet shooting

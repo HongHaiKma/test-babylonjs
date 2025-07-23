@@ -8,6 +8,8 @@ export class Bullet {
     scene: BABYLON.Scene;
     observer: BABYLON.Nullable<BABYLON.Observer<BABYLON.Scene>>;
     collisionObserver: BABYLON.Nullable<BABYLON.Observer<BABYLON.AbstractMesh>>;
+    private static shootSound: BABYLON.Sound | null = null;
+    private static soundLoaded: boolean = false;
 
     constructor(template: BABYLON.AbstractMesh, startPosition: BABYLON.Vector3, forward: BABYLON.Vector3, speed: number, scene: BABYLON.Scene) {
         const clonedMesh = template.clone("bulletInstance", null);
@@ -21,6 +23,9 @@ export class Bullet {
         this.forward = forward;
         this.speed = speed;
         this.scene = scene;
+        
+        // Play shooting sound
+        Bullet.playShootSound();
         
         // Set up collision detection using moveWithCollisions
         this.mesh.checkCollisions = true;
@@ -106,6 +111,76 @@ export class Bullet {
         if (this.observer) {
             this.scene.onBeforeRenderObservable.remove(this.observer);
             this.observer = null;
+        }
+    }
+    
+    // Static method to preload shooting sound
+    static async loadShootSound(scene: BABYLON.Scene) {
+        if (this.soundLoaded) return;
+        
+        // Array of sound URLs to try (with fallbacks)
+        const soundUrls = [
+            // Your primary Dropbox URL for shooting sound
+            "https://dl.dropbox.com/scl/fi/a2adgfbmgj7wuc0e73dzm/Shoot.ogg?rlkey=vdh8d9h0x8urb2hejqk8dndcx&st=ww56z5e6",
+            // Fallback URLs for shooting sounds
+            "https://www.soundjay.com/misc/sounds/bell_ringing_05.wav",
+            "https://opengameart.org/sites/default/files/shoot.wav"
+        ];
+        
+        this.tryLoadShootSound(soundUrls, 0, scene);
+    }
+    
+    private static tryLoadShootSound(urls: string[], index: number, scene: BABYLON.Scene) {
+        if (index >= urls.length) {
+            console.warn("All shooting sound URLs failed to load");
+            this.soundLoaded = true; // Mark as attempted
+            return;
+        }
+        
+        try {
+            this.shootSound = new BABYLON.Sound(
+                "shootSound",
+                urls[index],
+                scene,
+                () => {
+                    console.log(`✅ Shooting sound loaded from: ${urls[index]}`);
+                    this.soundLoaded = true;
+                },
+                {
+                    volume: 0.3,
+                    spatialSound: false, // Global sound for shooting
+                    autoplay: false,
+                    loop: false
+                }
+            );
+            
+        } catch (error) {
+            console.warn(`Error loading shoot sound from ${urls[index]}:`, error);
+            this.tryLoadShootSound(urls, index + 1, scene);
+        }
+    }
+    
+    // Static method to play shooting sound
+    static playShootSound() {
+        if (this.shootSound && this.soundLoaded) {
+            try {
+                // Stop previous sound if still playing
+                if (this.shootSound.isPlaying) {
+                    this.shootSound.stop();
+                }
+                this.shootSound.play();
+            } catch (error) {
+                console.warn("Could not play shooting sound:", error);
+            }
+        }
+    }
+    
+    // Static method to dispose shooting sound (call when app shuts down)
+    static disposeShootSound() {
+        if (this.shootSound) {
+            this.shootSound.dispose();
+            this.shootSound = null;
+            this.soundLoaded = false;
         }
     }
 }
