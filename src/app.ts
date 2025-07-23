@@ -27,6 +27,48 @@ const engine = new Engine(canvas, true);
 const scene = new Scene(engine);
 scene.collisionsEnabled = true;
 
+// Enable audio engine
+BABYLON.Engine.audioEngine = new BABYLON.AudioEngine();
+console.log("🔊 Audio engine initialized:", !!BABYLON.Engine.audioEngine);
+
+// Enable audio context on first user interaction (required by browsers)
+let audioEnabled = false;
+const enableAudio = () => {
+    if (!audioEnabled) {
+        console.log("🎵 Enabling audio on user interaction...");
+        if (BABYLON.Engine.audioEngine && BABYLON.Engine.audioEngine.audioContext) {
+            BABYLON.Engine.audioEngine.audioContext.resume();
+        }
+        Bullet.enableAudioContext();
+        audioEnabled = true;
+        console.log("✅ Audio enabled");
+    }
+};
+
+// Add event listeners for user interaction
+document.addEventListener('click', enableAudio);
+document.addEventListener('touchstart', enableAudio);
+
+// Add debug button for testing sound
+const debugButton = document.createElement('button');
+debugButton.innerHTML = '🧪 Test Sound';
+debugButton.style.position = 'fixed';
+debugButton.style.top = '10px';
+debugButton.style.left = '10px';
+debugButton.style.zIndex = '1000';
+debugButton.style.padding = '10px';
+debugButton.style.backgroundColor = '#4CAF50';
+debugButton.style.color = 'white';
+debugButton.style.border = 'none';
+debugButton.style.borderRadius = '5px';
+debugButton.onclick = () => {
+    console.log("🧪 Debug button clicked - testing sound system");
+    enableAudio();
+    Bullet.testSound();
+    Bullet.playShootSound();
+};
+document.body.appendChild(debugButton);
+
 // Enable physics engine with no gravity (0, 0, 0) instead of (0, -9.81, 0)
 scene.enablePhysics(new BABYLON.Vector3(0, 0, 0), new BABYLON.CannonJSPlugin());
 

@@ -27,6 +27,9 @@ export class Bullet {
         // Play shooting sound
         Bullet.playShootSound();
         
+        // Also enable audio context if needed (for mobile browsers)
+        Bullet.enableAudioContext();
+        
         // Set up collision detection using moveWithCollisions
         this.mesh.checkCollisions = true;
         
@@ -116,26 +119,38 @@ export class Bullet {
     
     // Static method to preload shooting sound
     static async loadShootSound(scene: BABYLON.Scene) {
-        if (this.soundLoaded) return;
+        if (this.soundLoaded) {
+            console.log("Shooting sound already loaded");
+            return;
+        }
+        
+        console.log("🔊 Loading shooting sound...");
         
         // Array of sound URLs to try (with fallbacks)
         const soundUrls = [
             // Your primary Dropbox URL for shooting sound
             "https://dl.dropbox.com/scl/fi/a2adgfbmgj7wuc0e73dzm/Shoot.ogg?rlkey=vdh8d9h0x8urb2hejqk8dndcx&st=ww56z5e6",
-            // Fallback URLs for shooting sounds
-            "https://www.soundjay.com/misc/sounds/bell_ringing_05.wav",
-            "https://opengameart.org/sites/default/files/shoot.wav"
+            // Working fallback URL (known to work)
+            "https://playground.babylonjs.com/sounds/gunshot.wav",
+            // Another fallback
+            "https://www.soundjay.com/misc/sounds/bell_ringing_05.wav"
         ];
         
-        this.tryLoadShootSound(soundUrls, 0, scene);
+        // Try to load sound with Promise for better async handling
+        return new Promise<void>((resolve) => {
+            this.tryLoadShootSoundWithPromise(soundUrls, 0, scene, resolve);
+        });
     }
     
-    private static tryLoadShootSound(urls: string[], index: number, scene: BABYLON.Scene) {
+    private static tryLoadShootSoundWithPromise(urls: string[], index: number, scene: BABYLON.Scene, resolve: () => void) {
         if (index >= urls.length) {
-            console.warn("All shooting sound URLs failed to load");
+            console.warn("❌ All shooting sound URLs failed to load");
             this.soundLoaded = true; // Mark as attempted
+            resolve();
             return;
         }
+        
+        console.log(`🔄 Trying to load shooting sound from: ${urls[index]}`);
         
         try {
             this.shootSound = new BABYLON.Sound(
@@ -143,35 +158,94 @@ export class Bullet {
                 urls[index],
                 scene,
                 () => {
-                    console.log(`✅ Shooting sound loaded from: ${urls[index]}`);
+                    console.log(`✅ Shooting sound loaded successfully from: ${urls[index]}`);
                     this.soundLoaded = true;
+                    resolve();
                 },
                 {
-                    volume: 0.3,
-                    spatialSound: false, // Global sound for shooting
+                    volume: 0.5,
+                    spatialSound: false,
                     autoplay: false,
                     loop: false
                 }
             );
             
+            // If loading fails, try next URL after timeout
+            setTimeout(() => {
+                if (!this.soundLoaded) {
+                    console.warn(`⏰ Timeout loading sound from: ${urls[index]}, trying next...`);
+                    this.tryLoadShootSoundWithPromise(urls, index + 1, scene, resolve);
+                }
+            }, 3000); // 3 second timeout
+            
         } catch (error) {
-            console.warn(`Error loading shoot sound from ${urls[index]}:`, error);
-            this.tryLoadShootSound(urls, index + 1, scene);
+            console.warn(`❌ Error loading shoot sound from ${urls[index]}:`, error);
+            this.tryLoadShootSoundWithPromise(urls, index + 1, scene, resolve);
         }
     }
     
     // Static method to play shooting sound
     static playShootSound() {
-        if (this.shootSound && this.soundLoaded) {
-            try {
+        console.log("🔫 Attempting to play shooting sound...");
+        console.log("Sound loaded:", this.soundLoaded);
+        console.log("Sound object exists:", !!this.shootSound);
+        
+        if (!this.shootSound) {
+            console.warn("❌ No shooting sound object available");
+            return;
+        }
+        
+        if (!this.soundLoaded) {
+            console.warn("❌ Shooting sound not yet loaded, trying to play anyway...");
+        }
+        
+        try {
+            // Check if sound is ready
+            if (this.shootSound.isReady && this.shootSound.isReady()) {
+                console.log("✅ Sound is ready, playing...");
+                
                 // Stop previous sound if still playing
                 if (this.shootSound.isPlaying) {
                     this.shootSound.stop();
                 }
+                
                 this.shootSound.play();
-            } catch (error) {
-                console.warn("Could not play shooting sound:", error);
+                console.log("🎵 Shooting sound played successfully!");
+            } else {
+                console.warn("⏳ Sound not ready yet, will try to play anyway...");
+                this.shootSound.play();
             }
+        } catch (error) {
+            console.error("❌ Could not play shooting sound:", error);
+            
+            // Try creating a simple beep sound as fallback
+            this.createFallbackSound();
+        }
+    }
+    
+    // Fallback method to create a simple beep sound
+    private static createFallbackSound() {
+        try {
+            console.log("🔔 Creating fallback beep sound...");
+            
+            // Create AudioContext for fallback sound
+            const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime); // 800 Hz tone
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.1);
+            
+            console.log("🎵 Fallback sound played");
+        } catch (fallbackError) {
+            console.error("❌ Even fallback sound failed:", fallbackError);
         }
     }
     
@@ -182,5 +256,41 @@ export class Bullet {
             this.shootSound = null;
             this.soundLoaded = false;
         }
+    }
+    
+    // Static method to enable audio context (needed for mobile browsers)
+    static enableAudioContext() {
+        try {
+            // Try to resume audio context if it's suspended
+            if (BABYLON.Engine.audioEngine && BABYLON.Engine.audioEngine.audioContext) {
+                const audioContext = BABYLON.Engine.audioEngine.audioContext;
+                if (audioContext.state === 'suspended') {
+                    console.log("🔊 Resuming suspended audio context...");
+                    audioContext.resume().then(() => {
+                        console.log("✅ Audio context resumed");
+                    }).catch((error: any) => {
+                        console.warn("❌ Failed to resume audio context:", error);
+                    });
+                }
+            }
+        } catch (error) {
+            console.warn("❌ Error enabling audio context:", error);
+        }
+    }
+    
+    // Debug method to test if sound system works
+    static testSound() {
+        console.log("🧪 Testing sound system...");
+        console.log("Sound object:", !!this.shootSound);
+        console.log("Sound loaded:", this.soundLoaded);
+        console.log("Audio engine:", !!BABYLON.Engine.audioEngine);
+        
+        if (this.shootSound) {
+            console.log("Sound ready:", this.shootSound.isReady ? this.shootSound.isReady() : "unknown");
+            console.log("Sound playing:", this.shootSound.isPlaying);
+        }
+        
+        // Try to play a simple test sound
+        this.createFallbackSound();
     }
 }
